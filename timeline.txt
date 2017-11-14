@@ -1,0 +1,9 @@
+Due 11/17
+
+Find fast C implementation - Both (2 each)
+Learn OpenCL
+  -Find OpenCL resources -Ryan
+  -Get OpenCL access -Both
+  -Practice code -Both
+Write AES in C -Richard
+Find AES benchmark -Ryan
