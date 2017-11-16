@@ -321,6 +321,7 @@ uint32_t td3[256] = {
     };
 
 uint8_t   roundCoeffients[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36};
+//Add other round coeffiencients
 uint32_t  subKeys[44];
 
 void addRoundKey(uint8_t* state, uint32_t* roundKey)
