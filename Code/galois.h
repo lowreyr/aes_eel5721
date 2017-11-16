@@ -13,7 +13,7 @@ uint8_t exponential[256];
 uint8_t logarithm[256];
 
 //Galois Field GF(2^8) multiplication
-uint8_t multiply(uint8_t, uint8_t);
-uint8_t multiply_1(uint8_t a, uint8_t b);
+uint8_t galois_multiply(uint8_t, uint8_t);
+//uint8_t multiply(uint8_t a, uint8_t b);
 
 #endif

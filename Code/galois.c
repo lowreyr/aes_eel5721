@@ -58,7 +58,7 @@ uint8_t logarithm[256] =
    0x44, 0x11, 0x92, 0xD9, 0x23, 0x20, 0x2E, 0x89, 0xB4, 0x7C, 0xB8, 0x26, 0x77, 0x99, 0xE3, 0xA5,
    0x67, 0x4A, 0xED, 0xDE, 0xC5, 0x31, 0xFE, 0x18, 0x0D, 0x63, 0x8C, 0x80, 0xC0, 0xF7, 0x70, 0x07};
 
-uint8_t multiply(uint8_t a, uint8_t b)
+uint8_t galois_multiply(uint8_t a, uint8_t b)
 {
   if (a == 0 || b == 0) { return 0; }
   uint16_t t = logarithm[a] + logarithm[b];
@@ -66,16 +66,16 @@ uint8_t multiply(uint8_t a, uint8_t b)
   return exponential[t];
 }
 
-uint8_t multiply_1(uint8_t a, uint8_t b)
-{
-   uint8_t r = 0, t;
-   while (a != 0)
-   {
-      if ((a & 1) != 0) { r ^= b; }
-      t = b & 0x80;
-      b = b << 1;
-      if (t != 0) { b ^= 0x1B; }
-      a = a >> 1;
-   }
-   return r;
-}
+// uint8_t multiply(uint8_t a, uint8_t b)
+// {
+//    uint8_t r = 0, t;
+//    while (a != 0)
+//    {
+//       if ((a & 1) != 0) { r ^= b; }
+//       t = b & 0x80;
+//       b = b << 1;
+//       if (t != 0) { b ^= 0x1B; }
+//       a = a >> 1;
+//    }
+//    return r;
+// }
