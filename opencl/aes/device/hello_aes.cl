@@ -85,7 +85,7 @@ __kernel void addRoundKey0(__global uchar* state, __global uchar* roundKey,  __g
 
   // add the vector elements
   output[index] = state[index] ^ roundKey[index];
-}
+//}
   //write_channel_intel(chr0, roundKey);
 }
 
