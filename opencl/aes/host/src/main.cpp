@@ -108,8 +108,8 @@ int main() {
 
   // Launch the kernel
   status = clEnqueueNDRangeKernel(queue, addRoundKey0, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution0, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn0, 1, NULL, &size, &size, 0, NULL, NULL);
+  //status = clEnqueueNDRangeKernel(queue, byteSubstitution0, 1, NULL, &size, &size, 0, NULL, NULL);
+  //status = clEnqueueNDRangeKernel(queue, mixColumn0, 1, NULL, &size, &size, 0, NULL, NULL);
   checkError(status, "Failed to launch kernel");
 
   // Wait for command queue to complete pending events
