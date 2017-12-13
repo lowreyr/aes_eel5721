@@ -51,6 +51,7 @@ constant uchar   roundCoeffients[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40
 channel uchar chb0;
 channel uchar chm0;
 channel uchar cha1;
+channel uchar chr0;
 
 __kernel void addRoundKey0(__global uchar* state, __global uchar* roundKey)
 {
