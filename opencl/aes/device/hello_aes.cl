@@ -84,7 +84,7 @@ __kernel void addRoundKey0(__global uchar* state, __global uchar* roundKey,  __g
   int index = get_global_id(0);
 
   // add the vector elements
-  output[index] = state[index] ^ roundKey[index];
+  output[index] = state[index] + roundKey[index];
   printf("State: \n");
   for(int i = 0; i < 16; i++)
   {
