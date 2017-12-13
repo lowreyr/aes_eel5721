@@ -6,7 +6,7 @@
 // whom the Software is furnished to do so, subject to the following conditions:
 // The above copyright notice and this permission notice shall be included in all copies or
 // substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 // OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -15,7 +15,7 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
-// 
+//
 // This agreement shall be governed in all respects by the laws of the State of California and
 // by the laws of the United States of America.
 
@@ -79,7 +79,7 @@ int main() {
   //for (int i=0; i<16; i++) {
     uint8_t input[16] = {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff};
     uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
-    
+
   //}
 
   cl_int status;
@@ -96,7 +96,7 @@ int main() {
   status = clSetKernelArg(addRoundKey0, 1, sizeof(cl_mem), &key_buffer);
   status = clSetKernelArg(mixColumn0, 0, sizeof(cl_mem), &out_buffer);
   checkError(status, "Failed to set kernel arg 0");
-  
+
 
   printf("\nKernel initialization is complete.\n");
   printf("Launching the kernel...\n\n");
@@ -116,7 +116,7 @@ int main() {
   status = clFinish(queue);
   checkError(status, "Failed to finish");
 
-  // Read result 
+  // Read result
   status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 16, output, 0, NULL, NULL);
   printf("\nAES output: ");
   for(int i=0; i<16; i++){
@@ -158,7 +158,7 @@ bool init() {
 
   // User-visible output - Platform information
   {
-    char char_buffer[STRING_BUFFER_LEN]; 
+    char char_buffer[STRING_BUFFER_LEN];
     printf("Querying platform for info:\n");
     printf("==========================\n");
     clGetPlatformInfo(platform, CL_PLATFORM_NAME, STRING_BUFFER_LEN, char_buffer, NULL);
@@ -203,8 +203,8 @@ bool init() {
   //const char *kernel_name = "hello_world";  // Kernel name, as defined in the CL file
   //kernel = clCreateKernel(program, kernel_name, &status);
   addRoundKey0 = clCreateKernel(program, "addRoundKey0", &status);
-  byteSubstitution0 = clCreateKernel(program, "byteSubstitution0", &status);
-  mixColumn0 = clCreateKernel(program, "mixColumn0", &status);
+  //byteSubstitution0 = clCreateKernel(program, "byteSubstitution0", &status);
+  //mixColumn0 = clCreateKernel(program, "mixColumn0", &status);
   checkError(status, "Failed to create kernels");
 
   return true;
@@ -216,7 +216,7 @@ void cleanup() {
     clReleaseKernel(addRoundKey0);
   }
   if(byteSubstitution0) {
-    clReleaseKernel(byteSubstitution0);      
+    clReleaseKernel(byteSubstitution0);
   }
   if(mixColumn0) {
     clReleaseKernel(mixColumn0);
@@ -249,7 +249,7 @@ static void device_info_bool( cl_device_id device, cl_device_info param, const c
    printf("%-40s = %s\n", name, (a?"true":"false"));
 }
 static void device_info_string( cl_device_id device, cl_device_info param, const char* name) {
-   char a[STRING_BUFFER_LEN]; 
+   char a[STRING_BUFFER_LEN];
    clGetDeviceInfo(device, param, STRING_BUFFER_LEN, &a, NULL);
    printf("%-40s = %s\n", name, a);
 }
@@ -293,4 +293,3 @@ static void display_device_info( cl_device_id device ) {
       printf("%-40s = %s\n", "Command queue profiling enabled? ", ((ccp & CL_QUEUE_PROFILING_ENABLE)?"true":"false"));
    }
 }
-
