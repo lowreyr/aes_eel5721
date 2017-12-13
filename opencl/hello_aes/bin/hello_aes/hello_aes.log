@@ -1,0 +1,9 @@
+Compiler Command: aoc -v -march=emulator device/hello_aes.cl -o bin/hello_aes.aocx
+/home2/rlb1116/aes/aes_eel5721/opencl/hello_aes/device/hello_aes.cl:58:44: warning: declaring kernel argument with no 'restrict' may lead to low kernel performance
+__kernel void addRoundKey0(__global uchar* state, __global uchar* roundKey)
+                                           ^
+/home2/rlb1116/aes/aes_eel5721/opencl/hello_aes/device/hello_aes.cl:58:67: warning: declaring kernel argument with no 'restrict' may lead to low kernel performance
+__kernel void addRoundKey0(__global uchar* state, __global uchar* roundKey)
+                                                                  ^
+2 warnings generated.
+Compiler Warning:  The default channel depths in emulation flow will not match default hardware flow depths. To change this behaivour, set the depth attribute for all channels or use compiler option: emulator-channel-depth-model
