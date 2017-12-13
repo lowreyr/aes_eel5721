@@ -1,12 +1,7 @@
 //AES
 
-//#include <stdio.h>
-//#include <stdint.h>
 #include "aes.h"
 //#include "galois.h"
-//#include <opencl.h>
-
-//typedef uchar uint8_t; 
 
 #pragma OPENCL EXTENSION cl_intel_channels : enable
 
@@ -91,106 +86,105 @@ __kernel void addRoundKey0(__global uchar* state, __global uchar* roundKey)
   write_channel_intel(chr0, roundKey);
 }
 
-__kernel void byteSubstitution0()
-{
-  uchar temp;
-  printf("\nbyteSubstition0: ");
-  for(int i = 0; i < 16; i++)
-  {
-    temp = read_channel_intel(chb0);
-    temp = sBox[temp];
-    printf("%x ",temp);
-    write_channel_intel(chm0, temp);
-  }
-}
+// __kernel void byteSubstitution0()
+// {
+//   uchar temp;
+//   printf("\nbyteSubstition0: ");
+//   for(int i = 0; i < 16; i++)
+//   {
+//     temp = read_channel_intel(chb0);
+//     temp = sBox[temp];
+//     printf("%x ",temp);
+//     write_channel_intel(chm0, temp);
+//   }
+// }
 
-__kernel void mixColumn0()//__global uchar* out)
-{
-  uchar state[16];
-  uchar tempState[16];
-  uchar Bx2[16];
-  uchar Bx3[16];
+// __kernel void mixColumn0()//__global uchar* out)
+// {
+//   uchar state[16];
+//   uchar tempState[16];
+//   uchar Bx2[16];
+//   uchar Bx3[16];
+//
+//   printf("\nmixColumn0: ");
+//
+//   for(int i = 0; i < 16; i++)
+//   {
+//     state[i] = read_channel_intel(chm0);
+//     Bx2[i] = state[i] << 1;
+//     Bx3[i] = state[i] << 1 ^ state[i];
+//
+//     if((state[i] & 0x80) != 0)
+//     {
+//       Bx2[i] ^= 0x1B;
+//       Bx3[i] ^= 0x1B;
+//     }
+//   }
+//
+//   tempState[0]  =    Bx2[0] ^    Bx3[5] ^ state[10] ^ state[15];
+//   tempState[1]  =  state[0] ^    Bx2[5] ^   Bx3[10] ^ state[15];
+//   tempState[2]  =  state[0] ^  state[5] ^   Bx2[10] ^   Bx3[15];
+//   tempState[3]  =    Bx3[0] ^  state[5] ^ state[10] ^   Bx2[15];
+//   tempState[4]  =    Bx2[4] ^    Bx3[9] ^ state[14] ^  state[3];
+//   tempState[5]  =  state[4] ^    Bx2[9] ^   Bx3[14] ^  state[3];
+//   tempState[6]  =  state[4] ^  state[9] ^   Bx2[14] ^    Bx3[3];
+//   tempState[7]  =    Bx3[4] ^  state[9] ^ state[14] ^    Bx2[3];
+//   tempState[8]  =    Bx2[8] ^   Bx3[13] ^  state[2] ^  state[7];
+//   tempState[9]  =  state[8] ^   Bx2[13] ^    Bx3[2] ^  state[7];
+//   tempState[10] =  state[8] ^ state[13] ^    Bx2[2] ^    Bx3[7];
+//   tempState[11] =    Bx3[8] ^ state[13] ^  state[2] ^    Bx2[7];
+//   tempState[12] =   Bx2[12] ^    Bx3[1] ^  state[6] ^ state[11];
+//   tempState[13] = state[12] ^    Bx2[1] ^    Bx3[6] ^ state[11];
+//   tempState[14] = state[12] ^  state[1] ^    Bx2[6] ^   Bx3[11];
+//   tempState[15] =   Bx3[12] ^  state[1] ^  state[6] ^   Bx2[11];
+//
+//   for(int i = 0; i < 16; i++)
+//   {
+//     out[i] = tempState[i];
+//     //write_channel_intel(cha1, state[i]);
+//     printf("%x ",tempState[i]);
+//   }
+// }
 
-  printf("\nmixColumn0: ");
+//figuring this out:
+// __kernel void keyExpansion()//uint32_t* subKeys)
+// {
+//   uchar key[16];
+//   key = read_channel_intel(chr0);
+//   uint32 subKeys[44];
+//   for(int i = 1; i < 11; i++)
+//   {
+//     uchar keyPosition = i << 2;
+//     uint32 subKey = subKeys[keyPosition - 1];
+//     uint32 gSubKey = ((sBox[(subKey >> 16)&0xFF] ^ roundCoefficients[i - 1]) << 24) | (sBox[(subKey >> 8)&0xFF] << 16) | (sBox[subKey&0xFF] << 8) | sBox[(subKey >> 24)&0xFF];
+//
+//     //subKeys[keyPosition]     = subKeys[keyPosition - 4] ^ g(subKeys[keyPosition - 1], roundCoefficients[i - 1]);
+//     subKeys[keyPosition]     = subKeys[keyPosition - 4] ^ gSubKey;
+//     subKeys[keyPosition + 1] = subKeys[keyPosition]     ^ subKeys[keyPosition - 3];
+//     subKeys[keyPosition + 2] = subKeys[keyPosition + 1] ^ subKeys[keyPosition - 2];
+//     subKeys[keyPosition + 3] = subKeys[keyPosition + 2] ^ subKeys[keyPosition - 1];
+//   }
+// }
 
-  for(int i = 0; i < 16; i++)
-  {
-    state[i] = read_channel_intel(chm0);
-    Bx2[i] = state[i] << 1;
-    Bx3[i] = state[i] << 1 ^ state[i];
-
-    if((state[i] & 0x80) != 0)
-    {
-      Bx2[i] ^= 0x1B;
-      Bx3[i] ^= 0x1B;
-    }
-  }
-
-  tempState[0]  =    Bx2[0] ^    Bx3[5] ^ state[10] ^ state[15];
-  tempState[1]  =  state[0] ^    Bx2[5] ^   Bx3[10] ^ state[15];
-  tempState[2]  =  state[0] ^  state[5] ^   Bx2[10] ^   Bx3[15];
-  tempState[3]  =    Bx3[0] ^  state[5] ^ state[10] ^   Bx2[15];
-  tempState[4]  =    Bx2[4] ^    Bx3[9] ^ state[14] ^  state[3];
-  tempState[5]  =  state[4] ^    Bx2[9] ^   Bx3[14] ^  state[3];
-  tempState[6]  =  state[4] ^  state[9] ^   Bx2[14] ^    Bx3[3];
-  tempState[7]  =    Bx3[4] ^  state[9] ^ state[14] ^    Bx2[3];
-  tempState[8]  =    Bx2[8] ^   Bx3[13] ^  state[2] ^  state[7];
-  tempState[9]  =  state[8] ^   Bx2[13] ^    Bx3[2] ^  state[7];
-  tempState[10] =  state[8] ^ state[13] ^    Bx2[2] ^    Bx3[7];
-  tempState[11] =    Bx3[8] ^ state[13] ^  state[2] ^    Bx2[7];
-  tempState[12] =   Bx2[12] ^    Bx3[1] ^  state[6] ^ state[11];
-  tempState[13] = state[12] ^    Bx2[1] ^    Bx3[6] ^ state[11];
-  tempState[14] = state[12] ^  state[1] ^    Bx2[6] ^   Bx3[11];
-  tempState[15] =   Bx3[12] ^  state[1] ^  state[6] ^   Bx2[11];
-
-  for(int i = 0; i < 16; i++)
-  {
-    out[i] = tempState[i];
-    //write_channel_intel(cha1, state[i]);
-    printf("%x ",tempState[i]);
-  }
-}
-
-//figuring this out: 
-__kernel void keyExpansion()//uint32_t* subKeys)
-{
-  uchar key[16];
-  key = read_channel_intel(chr0);
-  uint32 subKeys[44];
-  for(int i = 1; i < 11; i++)
-  {
-    uchar keyPosition = i << 2;
-    uint32 subKey = subKeys[keyPosition - 1];
-    uint32 gSubKey = ((sBox[(subKey >> 16)&0xFF] ^ roundCoefficients[i - 1]) << 24) | (sBox[(subKey >> 8)&0xFF] << 16) | (sBox[subKey&0xFF] << 8) | sBox[(subKey >> 24)&0xFF];
-
-    //subKeys[keyPosition]     = subKeys[keyPosition - 4] ^ g(subKeys[keyPosition - 1], roundCoefficients[i - 1]);
-    subKeys[keyPosition]     = subKeys[keyPosition - 4] ^ gSubKey;
-    subKeys[keyPosition + 1] = subKeys[keyPosition]     ^ subKeys[keyPosition - 3];
-    subKeys[keyPosition + 2] = subKeys[keyPosition + 1] ^ subKeys[keyPosition - 2];
-    subKeys[keyPosition + 3] = subKeys[keyPosition + 2] ^ subKeys[keyPosition - 1];
-  }
-}
-
-__kernel void addRoundKey1(__global uchar* out)
-{
-  uchar data;
-  uchar roundKey[16];
-  roundKey = read_channel_intel(chr1);
-  uchar result;
-  printf("\naddRoundKey0: ");
-  for(int i = 0; i < 16; i++)
-  {
-    //uchar statePosition = i << 2;
-    //state[statePosition]     = state[statePosition]     ^ (*(roundKey + i) >> 24);
-    //state[statePosition + 1] = state[statePosition + 1] ^ ((*(roundKey + i) >> 16)&0xFF);
-    //state[statePosition + 2] = state[statePosition + 2] ^ ((*(roundKey + i) >> 8)&0xFF);
-    //state[statePosition + 3] = state[statePosition + 3] ^ (*(roundKey + i)&0xFF);
-    data = read_channel_intel(cha1);//state[i];
-    key = roundKey[i];
-    result = data ^ key;
-    //write_channel_intel(chb1, result);
-    //printf("data: %x, key: %x, result: %x\n",data,key,result);
-    printf("%x ",result);
-  }
-}
-
+// __kernel void addRoundKey1(__global uchar* out)
+// {
+//   uchar data;
+//   uchar roundKey[16];
+//   roundKey = read_channel_intel(chr1);
+//   uchar result;
+//   printf("\naddRoundKey0: ");
+//   for(int i = 0; i < 16; i++)
+//   {
+//     //uchar statePosition = i << 2;
+//     //state[statePosition]     = state[statePosition]     ^ (*(roundKey + i) >> 24);
+//     //state[statePosition + 1] = state[statePosition + 1] ^ ((*(roundKey + i) >> 16)&0xFF);
+//     //state[statePosition + 2] = state[statePosition + 2] ^ ((*(roundKey + i) >> 8)&0xFF);
+//     //state[statePosition + 3] = state[statePosition + 3] ^ (*(roundKey + i)&0xFF);
+//     data = read_channel_intel(cha1);//state[i];
+//     key = roundKey[i];
+//     result = data ^ key;
+//     //write_channel_intel(chb1, result);
+//     //printf("data: %x, key: %x, result: %x\n",data,key,result);
+//     printf("%x ",result);
+//   }
+// }
