@@ -1,3 +1,5 @@
+#!/bin/bash
+
 module load aocl/17.0
 aoc -v -march=emulator device/$1.cl -o bin/$1.aocx
 if [ $? -ne 0 ]

@@ -52,9 +52,6 @@ channel uchar chb0;
 channel uchar chm0;
 channel uchar cha1;
 
-channel uchar* chr0;
-channel uchar* chr1;
-
 __kernel void addRoundKey0(__global uchar* state, __global uchar* roundKey)
 {
   //for(int r = 0; r < 16; r++)
