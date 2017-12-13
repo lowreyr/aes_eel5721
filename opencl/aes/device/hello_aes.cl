@@ -85,6 +85,17 @@ __kernel void addRoundKey0(__global uchar* state, __global uchar* roundKey,  __g
 
   // add the vector elements
   output[index] = state[index] ^ roundKey[index];
+  for(int = 0; i < 16; i++)
+  {
+    printf("State: \n");
+    printf("%X ", state[i]);
+    printf("Round Key: \n");
+    printf("%X ", roundKey[i]);
+    printf("Output: \n");
+    printf("%X ", output[i]);
+    printf("\n");
+
+  }
 //}
   //write_channel_intel(chr0, roundKey);
 }
