@@ -94,7 +94,7 @@ int main() {
 
   status = clSetKernelArg(addRoundKey0, 0, sizeof(cl_mem), &in_buffer);
   status = clSetKernelArg(addRoundKey0, 1, sizeof(cl_mem), &key_buffer);
-  status = clSetKernelArg(mixColumn0, 0, sizeof(cl_mem), &out_buffer);
+  //status = clSetKernelArg(mixColumn0, 0, sizeof(cl_mem), &out_buffer);
   checkError(status, "Failed to set kernel arg 0");
 
 
