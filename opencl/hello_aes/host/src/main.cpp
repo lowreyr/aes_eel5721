@@ -55,7 +55,11 @@ static cl_context context = NULL;
 static cl_command_queue queue = NULL;
 static cl_kernel addRoundKey0 = NULL;
 static cl_kernel byteSubstitution0 = NULL;
+static cl_kernel mixColumn0 = NULL;
 static cl_program program = NULL;
+static cl_mem key_buffer = NULL;
+static cl_mem in_buffer = NULL;
+static cl_mem out_buffer = NULL;
 
 // Function prototypes
 bool init();
@@ -68,13 +72,13 @@ static void display_device_info( cl_device_id device );
 
 // Entry point.
 int main() {
-  int *key    = (int *)malloc(sizeof(uint8_t)*16);
-  int *input  = (int *)malloc(sizeof(uint8_t)*16);
-  int *output = (int *)malloc(sizeof(uint8_t)*16);
-  int *golden = (int *)malloc(sizeof(uint8_t)*16);
+  //int *key    = (int *)malloc(sizeof(uint8_t)*16);
+  //int *input  = (int *)malloc(sizeof(uint8_t)*16);
+  uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*16);
+  //int *golden = (int *)malloc(sizeof(uint8_t)*16);
   //for (int i=0; i<16; i++) {
-    *input = {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff};
-    *key   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
+    uint8_t input[16] = {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff};
+    uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
     
   //}
 
@@ -83,6 +87,16 @@ int main() {
   if(!init()) {
     return -1;
   }
+  key_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 16, key, &status);
+  in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 16, input, &status);
+  out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint8_t) * 16, NULL, &status);
+
+
+  status = clSetKernelArg(addRoundKey0, 0, sizeof(cl_mem), &in_buffer);
+  status = clSetKernelArg(addRoundKey0, 1, sizeof(cl_mem), &key_buffer);
+  status = clSetKernelArg(mixColumn0, 0, sizeof(cl_mem), &out_buffer);
+  checkError(status, "Failed to set kernel arg 0");
+  
 
   printf("\nKernel initialization is complete.\n");
   printf("Launching the kernel...\n\n");
@@ -95,6 +109,7 @@ int main() {
   // Launch the kernel
   status = clEnqueueNDRangeKernel(queue, addRoundKey0, 1, NULL, &size, &size, 0, NULL, NULL);
   status = clEnqueueNDRangeKernel(queue, byteSubstitution0, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, mixColumn0, 1, NULL, &size, &size, 0, NULL, NULL);
   checkError(status, "Failed to launch kernel");
 
   // Wait for command queue to complete pending events
@@ -105,8 +120,17 @@ int main() {
   status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 16, output, 0, NULL, NULL);
   printf("\nAES output: ");
   for(int i=0; i<16; i++){
-    printf("%d",uint8_t);
+    printf("%x ",output[i]);
   }
+  printf("\ninput: ");
+  for(int i=0; i<16; i++){
+    printf("%x ",input[i]);
+  }
+  printf("\nkey: ");
+  for(int i=0; i<16; i++){
+    printf("%x ",key[i]);
+  }
+
 
   printf("\nKernel execution is complete.\n");
 
@@ -179,27 +203,23 @@ bool init() {
   //const char *kernel_name = "hello_world";  // Kernel name, as defined in the CL file
   //kernel = clCreateKernel(program, kernel_name, &status);
   addRoundKey0 = clCreateKernel(program, "addRoundKey0", &status);
-  checkError(status, "Failed to create addRoundKey0");
   byteSubstitution0 = clCreateKernel(program, "byteSubstitution0", &status);
-  checkError(status, "Failed to create byteSubstitution0");
+  mixColumn0 = clCreateKernel(program, "mixColumn0", &status);
+  checkError(status, "Failed to create kernels");
 
-  cl_mem key_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 16, key, &status);
-  cl_mem in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 16, input, &status);
-  cl_mem out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint8_t) * 16, NULL, &status);
-
-  // Set the kernel argument (argument 0)
-     status = clSetKernelArg(addRoundKey0, 0, sizeof(cl_mem), &in_buffer);
-     status = clSetKernelArg(addRoundKey0, 1, sizeof(cl_mem), &key_buffer);
-     status = clSetKernelArg(byteSubstitution0, 0, sizeof(cl_mem), &in_buffer);
-     checkError(status, "Failed to set kernel arg 0");
-  
   return true;
 }
 
 // Free the resources allocated during initialization
 void cleanup() {
-  if(kernel) {
-    clReleaseKernel(kernel);  
+  if(addRoundKey0) {
+    clReleaseKernel(addRoundKey0);
+  }
+  if(byteSubstitution0) {
+    clReleaseKernel(byteSubstitution0);      
+  }
+  if(mixColumn0) {
+    clReleaseKernel(mixColumn0);
   }
   if(program) {
     clReleaseProgram(program);
