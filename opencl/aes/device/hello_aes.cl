@@ -53,7 +53,7 @@ channel uchar chm0;
 channel uchar cha1;
 channel uchar chr0;
 
-__kernel void addRoundKey0(__global uchar* state, __global uchar* roundKey)
+__kernel void addRoundKey0(__global uchar* state, __global uchar* roundKey,  __global uchar* ouput)
 {
   //for(int r = 0; r < 16; r++)
   //{
@@ -61,27 +61,32 @@ __kernel void addRoundKey0(__global uchar* state, __global uchar* roundKey)
   //}
   uchar data;
   uchar key;
-  uchar result;
+  uchar *result;
   printf("\naddRoundKey0: ");
-  for(int i = 0; i < 16; i++)
-  {
-    //uchar statePosition = i << 2;
-    //state[statePosition]     = state[statePosition]     ^ (*(roundKey + i) >> 24);
-    //state[statePosition + 1] = state[statePosition + 1] ^ ((*(roundKey + i) >> 16)&0xFF);
-    //state[statePosition + 2] = state[statePosition + 2] ^ ((*(roundKey + i) >> 8)&0xFF);
-    //state[statePosition + 3] = state[statePosition + 3] ^ (*(roundKey + i)&0xFF);
-    data = state[i];
-    key = roundKey[i];
-    result = data ^ key;
-    //state[i] = state[i] ^ roundKey[i];
-  //}
-  //for(int w = 0; w < 16; w++)
-  //{
-    write_channel_intel(chb0, result);
-    //printf("data: %x, key: %x, result: %x\n",data,key,result);
-    printf("%x ",result);
-  }
-  write_channel_intel(chr0, roundKey);
+  // for(int i = 0; i < 16; i++)
+  // {
+  //   //uchar statePosition = i << 2;
+  //   //state[statePosition]     = state[statePosition]     ^ (*(roundKey + i) >> 24);
+  //   //state[statePosition + 1] = state[statePosition + 1] ^ ((*(roundKey + i) >> 16)&0xFF);
+  //   //state[statePosition + 2] = state[statePosition + 2] ^ ((*(roundKey + i) >> 8)&0xFF);
+  //   //state[statePosition + 3] = state[statePosition + 3] ^ (*(roundKey + i)&0xFF);
+  //   data = state[i];
+  //   key = roundKey[i];
+  //   result = data ^ key;
+  //   //state[i] = state[i] ^ roundKey[i];
+  // //}
+  // //for(int w = 0; w < 16; w++)
+  // //{
+  //   write_channel_intel(chb0, result);
+  //   //printf("data: %x, key: %x, result: %x\n",data,key,result);
+  //   printf("%x ",result);
+  // }
+  int index = get_global_id(0);
+
+  // add the vector elements
+  output[index] = state[index] + roundKey[index];
+}
+  //write_channel_intel(chr0, roundKey);
 }
 
 // __kernel void byteSubstitution0()
