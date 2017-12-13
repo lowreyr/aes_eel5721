@@ -49,16 +49,25 @@ constant uchar sBoxInverse[256] = {
    	0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d,
   };
 
-constant uchar   roundCoeffients[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36};
-//Add other round coeffiencients
+constant uchar   roundCoefficients[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36};
+//Add other round coefficients
 //uint32_t  subKeys[44];
 
 channel uchar chb0;
 channel uchar chm0;
 channel uchar cha1;
 
-channel uchar* chr0;
-channel uchar* chr1;
+channel uchar chr0;
+channel uchar chr1;
+channel uchar chr2;
+channel uchar chr3;
+channel uchar chr4;
+channel uchar chr5;
+channel uchar chr6;
+channel uchar chr7;
+channel uchar chr8;
+channel uchar chr9;
+channel uchar chr10;
 
 __kernel void addRoundKey0(__global uchar* state, __global uchar* roundKey)
 {
@@ -81,14 +90,11 @@ __kernel void addRoundKey0(__global uchar* state, __global uchar* roundKey)
     key = roundKey[i];
     result = data ^ key;
     //state[i] = state[i] ^ roundKey[i];
-  //}
-  //for(int w = 0; w < 16; w++)
-  //{
     write_channel_intel(chb0, result);
+    write_channel_intel(chr0, key);
     //printf("data: %x, key: %x, result: %x\n",data,key,result);
     printf("%x ",result);
   }
-  write_channel_intel(chr0, roundKey);
 }
 
 __kernel void byteSubstitution0()
@@ -145,8 +151,8 @@ __kernel void mixColumn0()//__global uchar* out)
 
   for(int i = 0; i < 16; i++)
   {
-    out[i] = tempState[i];
-    //write_channel_intel(cha1, state[i]);
+    //out[i] = tempState[i];
+    write_channel_intel(cha1, state[i]);
     printf("%x ",tempState[i]);
   }
 }
@@ -155,13 +161,28 @@ __kernel void mixColumn0()//__global uchar* out)
 __kernel void keyExpansion()//uint32_t* subKeys)
 {
   uchar key[16];
-  key = read_channel_intel(chr0);
-  uint32 subKeys[44];
+  uchar key1[16];
+  uchar key2[16];
+  uchar key3[16];
+  uchar key4[16];
+  uchar key5[16];
+  uchar key6[16];
+  uchar key7[16];
+  uchar key8[16];
+  uchar key9[16];
+  uchar key10[16];
+
+  for(int j=0; j<16; j++)
+  {
+    key[j] = read_channel_intel(chr0);
+  }
+
+  uint subKeys[44];
   for(int i = 1; i < 11; i++)
   {
     uchar keyPosition = i << 2;
-    uint32 subKey = subKeys[keyPosition - 1];
-    uint32 gSubKey = ((sBox[(subKey >> 16)&0xFF] ^ roundCoefficients[i - 1]) << 24) | (sBox[(subKey >> 8)&0xFF] << 16) | (sBox[subKey&0xFF] << 8) | sBox[(subKey >> 24)&0xFF];
+    uint subKey = subKeys[keyPosition - 1];
+    uint gSubKey = ((sBox[(subKey >> 16)&0xFF] ^ roundCoefficients[i - 1]) << 24) | (sBox[(subKey >> 8)&0xFF] << 16) | (sBox[subKey&0xFF] << 8) | sBox[(subKey >> 24)&0xFF];
 
     //subKeys[keyPosition]     = subKeys[keyPosition - 4] ^ g(subKeys[keyPosition - 1], roundCoefficients[i - 1]);
     subKeys[keyPosition]     = subKeys[keyPosition - 4] ^ gSubKey;
@@ -169,15 +190,30 @@ __kernel void keyExpansion()//uint32_t* subKeys)
     subKeys[keyPosition + 2] = subKeys[keyPosition + 1] ^ subKeys[keyPosition - 2];
     subKeys[keyPosition + 3] = subKeys[keyPosition + 2] ^ subKeys[keyPosition - 1];
   }
+
+  for(int k=0; k<16; k++)
+  {
+    write_channel_intel(chr1, key[k]); //FIXME: need to send key1[k]; using key[k] as temp filler
+//    write_channel_intel(chr2, key2[k]);
+//    write_channel_intel(chr3, key3[k]);
+//    write_channel_intel(chr4, key4[k]);
+//    write_channel_intel(chr5, key5[k]);
+//    write_channel_intel(chr6, key6[k]);
+//    write_channel_intel(chr7, key7[k]);
+//    write_channel_intel(chr8, key8[k]);
+//    write_channel_intel(chr9, key9[k]);
+//    write_channel_intel(chr10, key10[k]);
+  }
 }
 
 __kernel void addRoundKey1(__global uchar* out)
 {
   uchar data;
-  uchar roundKey[16];
-  roundKey = read_channel_intel(chr1);
+  uchar key;
+  //uchar roundKey[16];
+  //roundKey = read_channel_intel(chr1);
   uchar result;
-  printf("\naddRoundKey0: ");
+  printf("\naddRoundKey1: ");
   for(int i = 0; i < 16; i++)
   {
     //uchar statePosition = i << 2;
@@ -186,9 +222,10 @@ __kernel void addRoundKey1(__global uchar* out)
     //state[statePosition + 2] = state[statePosition + 2] ^ ((*(roundKey + i) >> 8)&0xFF);
     //state[statePosition + 3] = state[statePosition + 3] ^ (*(roundKey + i)&0xFF);
     data = read_channel_intel(cha1);//state[i];
-    key = roundKey[i];
+    key = read_channel_intel(chr1);//roundKey[i];
     result = data ^ key;
     //write_channel_intel(chb1, result);
+    out[i] = result;
     //printf("data: %x, key: %x, result: %x\n",data,key,result);
     printf("%x ",result);
   }

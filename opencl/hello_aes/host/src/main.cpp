@@ -53,9 +53,12 @@ static cl_platform_id platform = NULL;
 static cl_device_id device = NULL;
 static cl_context context = NULL;
 static cl_command_queue queue = NULL;
+static cl_command_queue keyQueue = NULL;
 static cl_kernel addRoundKey0 = NULL;
 static cl_kernel byteSubstitution0 = NULL;
 static cl_kernel mixColumn0 = NULL;
+static cl_kernel keyExpansion = NULL;
+static cl_kernel addRoundKey1 = NULL;
 static cl_program program = NULL;
 static cl_mem key_buffer = NULL;
 static cl_mem in_buffer = NULL;
@@ -94,7 +97,7 @@ int main() {
 
   status = clSetKernelArg(addRoundKey0, 0, sizeof(cl_mem), &in_buffer);
   status = clSetKernelArg(addRoundKey0, 1, sizeof(cl_mem), &key_buffer);
-  status = clSetKernelArg(mixColumn0, 0, sizeof(cl_mem), &out_buffer);
+  status = clSetKernelArg(addRoundKey1, 0, sizeof(cl_mem), &out_buffer);
   checkError(status, "Failed to set kernel arg 0");
   
 
@@ -110,6 +113,11 @@ int main() {
   status = clEnqueueNDRangeKernel(queue, addRoundKey0, 1, NULL, &size, &size, 0, NULL, NULL);
   status = clEnqueueNDRangeKernel(queue, byteSubstitution0, 1, NULL, &size, &size, 0, NULL, NULL);
   status = clEnqueueNDRangeKernel(queue, mixColumn0, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(keyQueue, keyExpansion, 1, NULL, &size, &size, 0, NULL, NULL);
+
+  status = clEnqueueNDRangeKernel(queue, addRoundKey1, 1, NULL, &size, &size, 0, NULL, NULL);
+
+
   checkError(status, "Failed to launch kernel");
 
   // Wait for command queue to complete pending events
@@ -187,6 +195,7 @@ bool init() {
 
   // Create the command queue.
   queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  keyQueue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
   checkError(status, "Failed to create command queue");
 
   // Create the program.
@@ -205,6 +214,9 @@ bool init() {
   addRoundKey0 = clCreateKernel(program, "addRoundKey0", &status);
   byteSubstitution0 = clCreateKernel(program, "byteSubstitution0", &status);
   mixColumn0 = clCreateKernel(program, "mixColumn0", &status);
+  addRoundKey1 = clCreateKernel(program, "addRoundKey1", &status);
+  keyExpansion = clCreateKernel(program, "keyExpansion", &status);
+
   checkError(status, "Failed to create kernels");
 
   return true;
@@ -221,6 +233,14 @@ void cleanup() {
   if(mixColumn0) {
     clReleaseKernel(mixColumn0);
   }
+
+  if(addRoundKey1) {
+    clReleaseKernel(addRoundKey1);
+  }
+  if(keyExpansion) {
+    clReleaseKernel(keyExpansion);
+  }
+
   if(program) {
     clReleaseProgram(program);
   }
