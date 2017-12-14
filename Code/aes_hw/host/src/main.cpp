@@ -105,6 +105,7 @@ int main(int argc, char *argv[]) {
   printf("here\n");
   FILE *fp;
   fp = fopen("../../rime.txt", "r");
+  printf("%x",fp);
   fseek(fp,0,SEEK_END);
   size_t file_size = ftell(fp);
   fclose(fp);
