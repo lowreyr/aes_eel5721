@@ -133,10 +133,10 @@ int main(int argc, char *argv[]) {
   FILE *fp;
   FILE *fp2;
   int c;
-  printf("here\n");
+
   fp = fopen("hello.txt", "r");
   fp2 = fopen("text.txt","w");
-  printf("here\n");
+
   for(int i = 0; i < 16; i++)
   {
     input[i] = fgetc(fp);
@@ -191,26 +191,26 @@ int main(int argc, char *argv[]) {
 
   // Read result
   status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 16, output, 0, NULL, NULL);
-  printf("here");
+
   for(int i = 0; i < 16; i++)
   {
     fputc(output[i], fp2);
   }
-  printf("here");
+
   fclose(fp);
   fclose(fp2);
 
   printf("\nAES output: ");
   for(int i=0; i<16; i++){
-    printf("%x ",output[i]);
+    printf("%x",output[i]);
   }
   printf("\ninput: ");
   for(int i=0; i<16; i++){
-    printf("%x ",input[i]);
+    printf("%x",input[i]);
   }
   printf("\nkey: ");
   for(int i=0; i<16; i++){
-    printf("%x ",key[i]);
+    printf("%x",key[i]);
   }
 
 
