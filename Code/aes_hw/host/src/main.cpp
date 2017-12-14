@@ -103,8 +103,7 @@ static void display_device_info( cl_device_id device );
 // Entry point.
 int main() {
   FILE *fp;
-  fp = fopen("rime.txt", "r");
-  //printf("%x",fp);
+  fp = fopen("../../rime_small.txt", "r");
   printf("here\n");
   fseek(fp,0,SEEK_END);
   printf("here2\n");
