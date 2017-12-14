@@ -126,9 +126,10 @@ int main() {
     for(int j = 0; j < 16; j++)
     {
       input[j] = fgetc(fp);
+      printf("c%",input[j]);
     }
 
-
+    printf("\n");
 
   key_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t)*16, key, &status);
   in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t)*16, input, &status);
