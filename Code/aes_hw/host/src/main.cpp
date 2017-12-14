@@ -149,6 +149,7 @@ int main() {
 
   const double start_time = getCurrentTimestamp();
   // Launch the kernel
+  queue[i] = clCreateCommandQueue(context, device[i], CL_QUEUE_PROFILING_ENABLE, &status);
   status = clEnqueueNDRangeKernel(keyQueue[i], keyExpansion, 1, NULL, &size, &size, 0, NULL, NULL);
   status = clEnqueueNDRangeKernel(queue[i], addRoundKey0, 1, NULL, &size, &size, 0, NULL, NULL);
   status = clEnqueueNDRangeKernel(queue[i], byteSubstitution0, 1, NULL, &size, &size, 0, NULL, NULL);
