@@ -137,7 +137,7 @@ int main() {
   in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t)*(file_size-1), input, &status);
   out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint8_t)*(file_size-1), NULL, &status);
 
-  status = clSetKernelArg(addRoundKey0, 0, sizeof(cl_mem), &in_buffer);
+  status = clSetKernelArg(addRoundKey0, 0, sizeof(cl_mem), (&in_buffer+16));
   status = clSetKernelArg(addRoundKey0, 1, sizeof(cl_mem), &key_buffer);
   status = clSetKernelArg(addRoundKey10, 0, sizeof(cl_mem), &out_buffer);
   checkError(status, "Failed to set kernel arg 0");
