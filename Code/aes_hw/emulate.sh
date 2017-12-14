@@ -11,4 +11,4 @@ if [ $? -ne 0 ]
 then
   exit $?
 fi
-env CL_CONTEXT_EMULATOR_DEVICE_ALTERA=1 ./bin/host ../hello.txt
+env CL_CONTEXT_EMULATOR_DEVICE_ALTERA=1 ./bin/host
