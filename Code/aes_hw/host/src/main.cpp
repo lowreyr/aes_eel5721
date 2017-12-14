@@ -104,7 +104,7 @@ static void display_device_info( cl_device_id device );
 int main(int argc, char *argv[]) {
 
   FILE *fp;
-  fp = fopen(argv[1], "r");
+  fp = fopen("../../rime.txt", "r");
   fseek(fp,0,SEEK_END);
   size_t file_size = ftell(fp);
   fclose(fp);
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
 
   FILE *fp2;
 
-  fp = fopen(argv[i], "r");
+  fp = fopen("../../rime.txt", "r");
 
   for(int i = 0; i < file_size; i++)
   {
@@ -133,7 +133,6 @@ int main(int argc, char *argv[]) {
     {
       input[i] = fgetc(fp);
     }
-    printf("%x",input[i]);
   }
 
   key_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t)*16, key, &status);
