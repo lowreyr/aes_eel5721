@@ -193,7 +193,7 @@ int main() {
   printf("\nTime: %0.3f ms\n", (end_time - start_time) * 1e3);
 
   // Read result
-  status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 32, output, 0, NULL, NULL);
+  status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 16, output, 0, NULL, NULL);
 
   fp2 = fopen("text.txt","w");
   for(int i = 0; i < file_size-1; i++)
