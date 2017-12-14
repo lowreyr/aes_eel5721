@@ -112,7 +112,10 @@ int main() {
   int c;
 
   fp = fopen("hello.txt", "r");
-
+  if(fp == NULL)
+  {
+    printf("NULL\n");
+  }
   fseek(fp,0,SEEK_END);
   size_t file_size = ftell(fp);
   printf("File size: %d\n",file_size);
