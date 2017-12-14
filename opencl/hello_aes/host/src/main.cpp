@@ -53,7 +53,18 @@ static cl_platform_id platform = NULL;
 static cl_device_id device = NULL;
 static cl_context context = NULL;
 static cl_command_queue queue = NULL;
-static cl_command_queue keyQueue = NULL;
+
+static cl_command_queue qark0 = NULL;
+static cl_command_queue qark1 = NULL;
+static cl_command_queue qark2 = NULL;
+static cl_command_queue qark3 = NULL;
+static cl_command_queue qark4 = NULL;
+static cl_command_queue qark5 = NULL;
+static cl_command_queue qark6 = NULL;
+static cl_command_queue qark7 = NULL;
+static cl_command_queue qark8 = NULL;
+static cl_command_queue qark9 = NULL;
+static cl_command_queue qark10 = NULL;
 static cl_kernel addRoundKey0 = NULL;
 static cl_kernel addRoundKey1 = NULL;
 static cl_kernel addRoundKey2 = NULL;
@@ -65,6 +76,16 @@ static cl_kernel addRoundKey7 = NULL;
 static cl_kernel addRoundKey8 = NULL;
 static cl_kernel addRoundKey9 = NULL;
 static cl_kernel addRoundKey10 = NULL;
+static cl_command_queue qbs0 = NULL;
+static cl_command_queue qbs1 = NULL;
+static cl_command_queue qbs2 = NULL;
+static cl_command_queue qbs3 = NULL;
+static cl_command_queue qbs4 = NULL;
+static cl_command_queue qbs5 = NULL;
+static cl_command_queue qbs6 = NULL;
+static cl_command_queue qbs7 = NULL;
+static cl_command_queue qbs8 = NULL;
+static cl_command_queue qbs9 = NULL;
 static cl_kernel byteSubstitution0 = NULL;
 static cl_kernel byteSubstitution1 = NULL;
 static cl_kernel byteSubstitution2 = NULL;
@@ -75,7 +96,17 @@ static cl_kernel byteSubstitution6 = NULL;
 static cl_kernel byteSubstitution7 = NULL;
 static cl_kernel byteSubstitution8 = NULL;
 static cl_kernel byteSubstitution9 = NULL;
+static cl_command_queue keyQueue = NULL;
 static cl_kernel keyExpansion = NULL;
+static cl_command_queue qmc0 = NULL;
+static cl_command_queue qmc1 = NULL;
+static cl_command_queue qmc2 = NULL;
+static cl_command_queue qmc3 = NULL;
+static cl_command_queue qmc4 = NULL;
+static cl_command_queue qmc5 = NULL;
+static cl_command_queue qmc6 = NULL;
+static cl_command_queue qmc7 = NULL;
+static cl_command_queue qmc8 = NULL;
 static cl_kernel mixColumn0 = NULL;
 static cl_kernel mixColumn1 = NULL;
 static cl_kernel mixColumn2 = NULL;
@@ -85,6 +116,7 @@ static cl_kernel mixColumn5 = NULL;
 static cl_kernel mixColumn6 = NULL;
 static cl_kernel mixColumn7 = NULL;
 static cl_kernel mixColumn8 = NULL;
+static cl_command_queue qsr = NULL;
 static cl_kernel shiftRows = NULL;
 static cl_program program = NULL;
 static cl_mem key_buffer = NULL;
@@ -103,18 +135,51 @@ static void display_device_info( cl_device_id device );
 // Entry point.
 int main(int argc, char *argv[]) {
 
-  uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*16);
+  //uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*16);
   uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
-  char input[16];
+  //char input[16];
   
+
+  FILE *fp;
+  FILE *fp2;
+  //FILE *infile
+  FILE *outfile;
+  size_t fileSize;
+  char *input;
+  char *output;
+  int c;
+
+//  fp2 = fopen("text.txt","w");
+
+//  for (int i = 1; i < argc; i++)
+//  {
+    fp = fopen(argv[1], "r");
+
+    if (fp == NULL)
+    {
+        fprintf(stderr, "cat: can't open %s\n", argv[1]);
+        //continue;
+    }
+    fseek(fp, 0, SEEK_END);
+    fileSize = ftell(fp);
+    rewind(fp);
+    input = (char*) malloc(fileSize); // + 1);
+    output = (char*) malloc(fileSize);
+    //input[fileSize] = '\0';
+    fread(input, sizeof(char), fileSize, fp);
+    fclose(fp);
+//  }
+
+
+
   cl_int status;
 
   if(!init()) {
     return -1;
   }
   key_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 16, key, &status);
-  in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 128, input, &status);
-  out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint8_t) * 16, NULL, &status);
+  in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(char) * fileSize, input, &status);
+  out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(char) * fileSize, NULL, &status);
 
   status = clSetKernelArg(addRoundKey0, 0, sizeof(cl_mem), &in_buffer);
   status = clSetKernelArg(addRoundKey0, 1, sizeof(cl_mem), &key_buffer);
@@ -130,93 +195,82 @@ int main(int argc, char *argv[]) {
   size_t gSize[3] = {work_group_size, 1, 1};
   size_t size = 1;
 
-  FILE *fp;
-  FILE *fp2;
-  int c;
-
-  fp2 = fopen("text.txt","w");
-
-  for (int i = 1; i < argc; i++)
-  {
-    fp = fopen(argv[i], "r");
-
-    if (fp == NULL)
-    {
-        fprintf(stderr, "cat: can't open %s\n", argv[i]);
-        continue;
-    }
-  }
-
-  for(int i = 0; i < 16; i++)
-  {
-    input[i] = fgetc(fp);
-  }
+  // for(int i = 0; i < 16; i++)
+  // {
+  //   input[i] = fgetc(fp);
+  // }
 
   // Launch the kernel
-  status = clEnqueueNDRangeKernel(keyQueue, keyExpansion, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey0, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution0, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn0, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey1, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution1, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn1, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey2, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution2, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn2, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey3, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution3, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn3, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey4, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution4, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn4, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey5, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution5, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn5, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey6, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution6, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn6, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey7, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution7, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn7, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey8, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution8, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn8, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey9, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution9, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, shiftRows, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey10, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(keyQueue, keyExpansion, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qark0, addRoundKey0, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qbs0, byteSubstitution0, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qmc0, mixColumn0, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qark1, addRoundKey1, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qbs1, byteSubstitution1, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qmc1, mixColumn1, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qark2, addRoundKey2, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qbs2, byteSubstitution2, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qmc2, mixColumn2, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qark3, addRoundKey3, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qbs3, byteSubstitution3, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qmc3, mixColumn3, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qark4, addRoundKey4, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qbs4, byteSubstitution4, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qmc4, mixColumn4, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qark5, addRoundKey5, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qbs5, byteSubstitution5, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qmc5, mixColumn5, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qark6, addRoundKey6, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qbs6, byteSubstitution6, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qmc6, mixColumn6, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qark7, addRoundKey7, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qbs7, byteSubstitution7, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qmc7, mixColumn7, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qark8, addRoundKey8, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qbs8, byteSubstitution8, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qmc8, mixColumn8, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qark9, addRoundKey9, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qbs9, byteSubstitution9, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qsr, shiftRows, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueTask(qark10, addRoundKey10, 0, NULL, NULL);//, 1, NULL, &size, &size, 0, NULL, NULL);
 
-  int i = 0;
-  do {
-      input[i] = fgetc(fp);
-      if( feof(fp) )
-      {
-        for(int j = i; j < 16; j++)
-        {
-          input[j] = 0;
-        }
-        fputc(0, fp2);
-        break ;
-      }
-      i = (i + 1)&0xF;
-      if (i == 0)
-      {
-        for(int k = 0; k < 16; k++)
-        {
-          fputc(output[k], fp2);
-        }
-      };
-   } while(1);
+  // int i = 0;
+  // do {
+  //     input[i] = fgetc(fp);
+  //     if( feof(fp) )
+  //     {
+  //       for(int j = i; j < 16; j++)
+  //       {
+  //         input[j] = 0;
+  //       }
+  //       fputc(0, fp2);
+  //       break ;
+  //     }
+  //     i = (i + 1)&0xF;
+  //     if (i == 0)
+  //     {
+  //       for(int k = 0; k < 16; k++)
+  //       {
+  //         fputc(output[k], fp2);
+  //       }
+  //     };
+  //  } while(1);
 
 
   checkError(status, "Failed to launch kernel");
 
   // Wait for command queue to complete pending events
-  status = clFinish(queue);
+  status = clFinish(qark10);
   checkError(status, "Failed to finish");
 
   // Read result
-  status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 1024, output, 0, NULL, NULL);
+  status = clEnqueueReadBuffer(qark10, out_buffer, CL_TRUE, 0, sizeof(char) * fileSize, output, 0, NULL, NULL);
+  
+  outfile = fopen("text.txt","w");
+  fwrite(output, sizeof(char), fileSize, outfile);
+  fclose(outfile);
+
+
 /*
   printf("\nAES output: ");
   for(int i=0; i<16; i++){
@@ -234,8 +288,8 @@ int main(int argc, char *argv[]) {
 
   printf("\nKernel execution is complete.\n");
 
-    fclose(fp);
-    fclose(fp2);
+  //  fclose(fp);
+  //  fclose(fp2);
 
   // Free the resources allocated
   cleanup();
@@ -289,8 +343,39 @@ bool init() {
   checkError(status, "Failed to create context");
 
   // Create the command queue.
-  queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  //queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
   keyQueue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qark0 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qbs0 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qmc0 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qark1 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qbs1 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qmc1 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qark2 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qbs2 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qmc2 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qark3 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qbs3 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qmc3 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qark4 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qbs4 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qmc4 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qark5 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qbs5 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qmc5 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qark6 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qbs6 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qmc6 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qark7 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qbs7 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qmc7 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qark8 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qbs8 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qmc8 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qark9 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qbs9 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qsr = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  qark10 = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
   checkError(status, "Failed to create command queue");
 
   // Create the program.
@@ -450,6 +535,39 @@ void cleanup() {
   if(keyQueue) {
     clReleaseCommandQueue(keyQueue);
   }
+
+  if (qark0) { clReleaseCommandQueue(qark0); }
+  if (qbs0) { clReleaseCommandQueue(qbs0); }
+  if (qmc0) { clReleaseCommandQueue(qmc0); }
+  if (qark1) { clReleaseCommandQueue(qark1); }
+  if (qbs1) { clReleaseCommandQueue(qbs1); }
+  if (qmc1) { clReleaseCommandQueue(qmc1); }
+  if (qark2) { clReleaseCommandQueue(qark2); }
+  if (qbs2) { clReleaseCommandQueue(qbs2); }
+  if (qmc2) { clReleaseCommandQueue(qmc2); }
+  if (qark3) { clReleaseCommandQueue(qark3); }
+  if (qbs3) { clReleaseCommandQueue(qbs3); }
+  if (qmc3) { clReleaseCommandQueue(qmc3); }
+  if (qark4) { clReleaseCommandQueue(qark4); }
+  if (qbs4) { clReleaseCommandQueue(qbs4); }
+  if (qmc4) { clReleaseCommandQueue(qmc4); }
+  if (qark5) { clReleaseCommandQueue(qark5); }
+  if (qbs5) { clReleaseCommandQueue(qbs5); }
+  if (qmc5) { clReleaseCommandQueue(qmc5); }
+  if (qark6) { clReleaseCommandQueue(qark6); }
+  if (qbs6) { clReleaseCommandQueue(qbs6); }
+  if (qmc6) { clReleaseCommandQueue(qmc6); }
+  if (qark7) { clReleaseCommandQueue(qark7); }
+  if (qbs7) { clReleaseCommandQueue(qbs7); }
+  if (qmc7) { clReleaseCommandQueue(qmc7); }
+  if (qark8) { clReleaseCommandQueue(qark8); }
+  if (qbs8) { clReleaseCommandQueue(qbs8); }
+  if (qmc8) { clReleaseCommandQueue(qmc8); }
+  if (qark9) { clReleaseCommandQueue(qark9); }
+  if (qbs9) { clReleaseCommandQueue(qbs9); }
+  if (qsr) { clReleaseCommandQueue(qsr); }
+  if (qark10) { clReleaseCommandQueue(qark10); }
+
   if(context) {
     clReleaseContext(context);
   }
