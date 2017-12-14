@@ -116,11 +116,11 @@ int main() {
   fseek(fp,0,SEEK_END);
   size_t file_size = ftell(fp);
 
-  uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*file_size);
+  uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*(file_size-1);
   uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
-  uint8_t input[file_size];
+  uint8_t input[file_size-1];
 
-  for(int i = 0; i < file_size; i++)
+  for(int i = 0; i < (file_size-1); i++)
   {
     if( feof(fp) )
     {
