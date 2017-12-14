@@ -134,17 +134,17 @@ int main(int argc, char *argv[]) {
   FILE *fp2;
   int c;
 
+  fp = fopen("../hello.txt", "r");
   fp2 = fopen("text.txt","w");
-
-  for (int i = 1; i < argc; i++)
+  if (fp == NULL)
   {
-    fp = fopen("../hello.txt", "r");
+      fprintf(stderr, "cat: can't open %s\n", argv[i]);
+      continue;
+  }
 
-    if (fp == NULL)
-    {
-        fprintf(stderr, "cat: can't open %s\n", argv[i]);
-        continue;
-    }
+  for(int i = 0; i < 16; i++)
+  {
+    input[i] = fgetc(fp);
   }
 
   const double start_time = getCurrentTimestamp();
