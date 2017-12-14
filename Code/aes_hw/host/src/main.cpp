@@ -136,10 +136,11 @@ int main(int argc, char *argv[]) {
 
   fp = fopen("../hello.txt", "r");
   fp2 = fopen("text.txt","w");
-  
+  printf("here");
   for(int i = 0; i < 16; i++)
   {
     input[i] = fgetc(fp);
+    printf("%c",input[i]);
   }
 
   const double start_time = getCurrentTimestamp();
@@ -190,12 +191,12 @@ int main(int argc, char *argv[]) {
 
   // Read result
   status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 16, output, 0, NULL, NULL);
-
+  printf("here");
   for(int i = 0; i < 16; i++)
   {
     output[i] = fgetc(fp);
   }
-
+  printf("here");
   fclose(fp);
   fclose(fp2);
 
