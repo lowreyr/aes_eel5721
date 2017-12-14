@@ -121,7 +121,7 @@ int main() {
   uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
   uint8_t input[16];
 
-  for(int j = 0; j < 16; j++)
+  for(int i = 0; i < 16; i++)
   {
     input[i] = fgetc(fp);
   }
@@ -147,7 +147,7 @@ int main() {
 
   const double start_time = getCurrentTimestamp();
   // Launch the kernel
-  wg = (file_size-1)/16;
+  int wg = (file_size-1)/16;
   status = clEnqueueNDRangeKernel(keyQueue, keyExpansion, 1, NULL, &size, &size, 0, NULL, NULL);
   status = clEnqueueNDRangeKernel(queue, addRoundKey0, 1, NULL, wg, &size, 0, NULL, NULL);
   status = clEnqueueNDRangeKernel(queue, byteSubstitution0, 1, NULL, wg, &size, 0, NULL, NULL);
