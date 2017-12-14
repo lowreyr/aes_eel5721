@@ -195,8 +195,8 @@ int main() {
   {
     fputc(output[i], fp2);
   }
-  fputc('\0', fp2);
 }
+  fputc('\0', fp2);
   fclose(fp);
   fclose(fp2);
   printf("\nKernel execution is complete.\n");
