@@ -101,10 +101,10 @@ static void device_info_string( cl_device_id device, cl_device_info param, const
 static void display_device_info( cl_device_id device );
 
 // Entry point.
-int main() {
+int main(int argc, char *argv[]) {
 
   FILE *fp;
-  fp = fopen("hello.txt", "r");
+  fp = fopen(argv[1], "r");
   fseek(fp,0,SEEK_END);
   size_t file_size = ftell(fp);
   fclose(fp);
@@ -121,7 +121,7 @@ int main() {
 
   FILE *fp2;
 
-  fp = fopen("hello.txt", "r");
+  fp = fopen(argv[i], "r");
 
   for(int i = 0; i < file_size; i++)
   {
