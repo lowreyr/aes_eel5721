@@ -134,9 +134,9 @@ int main(int argc, char *argv[]) {
   FILE *fp2;
   int c;
   printf("here\n");
-  fp = fopen("../hello.txt", "r");
+  fp = fopen("hello.txt", "r");
   fp2 = fopen("text.txt","w");
-  printf("here");
+  printf("here\n");
   for(int i = 0; i < 16; i++)
   {
     input[i] = fgetc(fp);
