@@ -101,10 +101,10 @@ static void device_info_string( cl_device_id device, cl_device_info param, const
 static void display_device_info( cl_device_id device );
 
 // Entry point.
-int main(int argc, char *argv[]) {
+int main() {
   printf("here\n");
   FILE *fp;
-  fp = fopen("../../rime.txt", "r");
+  fp = fopen("rime.txt", "r");
   printf("%x",fp);
   fseek(fp,0,SEEK_END);
   size_t file_size = ftell(fp);
