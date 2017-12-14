@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
   printf("here");
   for(int i = 0; i < 16; i++)
   {
-    fputc(output[k], fp2);
+    fputc(output[i], fp2);
   }
   printf("here");
   fclose(fp);
