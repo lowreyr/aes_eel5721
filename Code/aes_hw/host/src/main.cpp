@@ -50,7 +50,7 @@ static const int thread_id_to_output = 2;
 
 // OpenCL runtime configuration
 static cl_platform_id platform = NULL;
-static cl_device_id device = NULL;
+scoped_array<cl_device_id> device;
 static cl_context context = NULL;
 scoped_array<cl_command_queue> queue;
 scoped_array<cl_command_queue> keyQueue;
