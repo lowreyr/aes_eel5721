@@ -52,8 +52,8 @@ static const int thread_id_to_output = 2;
 static cl_platform_id platform = NULL;
 static cl_device_id device = NULL;
 static cl_context context = NULL;
-static cl_command_queue queue = NULL;
-static cl_command_queue keyQueue = NULL;
+scoped_array<cl_command_queue> queue;
+scoped_array<cl_command_queue> keyQueue;
 static cl_kernel addRoundKey0 = NULL;
 static cl_kernel addRoundKey1 = NULL;
 static cl_kernel addRoundKey2 = NULL;
@@ -149,43 +149,43 @@ int main() {
 
   const double start_time = getCurrentTimestamp();
   // Launch the kernel
-  status = clEnqueueNDRangeKernel(keyQueue, keyExpansion, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey0, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution0, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn0, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey1, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution1, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn1, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey2, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution2, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn2, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey3, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution3, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn3, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey4, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution4, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn4, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey5, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution5, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn5, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey6, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution6, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn6, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey7, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution7, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn7, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey8, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution8, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, mixColumn8, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey9, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, byteSubstitution9, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, shiftRows, 1, NULL, &size, &size, 0, NULL, NULL);
-  status = clEnqueueNDRangeKernel(queue, addRoundKey10, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(keyQueue[i], keyExpansion, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], addRoundKey0, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], byteSubstitution0, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], mixColumn0, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], addRoundKey1, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], byteSubstitution1, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], mixColumn1, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], addRoundKey2, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], byteSubstitution2, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], mixColumn2, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], addRoundKey3, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], byteSubstitution3, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], mixColumn3, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], addRoundKey4, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], byteSubstitution4, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], mixColumn4, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], addRoundKey5, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], byteSubstitution5, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], mixColumn5, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], addRoundKey6, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], byteSubstitution6, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], mixColumn6, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], addRoundKey7, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], byteSubstitution7, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], mixColumn7, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], addRoundKey8, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], byteSubstitution8, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], mixColumn8, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], addRoundKey9, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], byteSubstitution9, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], shiftRows, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue[i], addRoundKey10, 1, NULL, &size, &size, 0, NULL, NULL);
 
   checkError(status, "Failed to launch kernel");
 
   // Wait for command queue to complete pending events
-  status = clFinish(queue);
+  status = clFinish(queue[i]);
   checkError(status, "Failed to finish");
 
   const double end_time = getCurrentTimestamp();
@@ -194,14 +194,14 @@ int main() {
   printf("\nTime: %0.3f ms\n", (end_time - start_time) * 1e3);
 
   // Read result
-  status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 16, output, 0, NULL, NULL);
+  status = clEnqueueReadBuffer(queue[i], out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 16, output, 0, NULL, NULL);
 
 
   for(int i = 0; i < 16; i++)
   {
     fputc(output[i], fp2);
   }
-  
+
 }
   fclose(fp);
   fclose(fp2);
