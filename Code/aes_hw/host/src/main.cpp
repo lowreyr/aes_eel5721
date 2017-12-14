@@ -139,8 +139,8 @@ int main(int argc, char *argv[]) {
   printf("here\n");
   for(int i = 0; i < 16; i++)
   {
-    input[i] = fgetc(fp);
-    printf("%c",input[i]);
+    //input[i] = fgetc(fp);
+    printf("%c",fgetc(fp));
   }
 
   const double start_time = getCurrentTimestamp();
