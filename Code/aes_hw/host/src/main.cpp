@@ -136,6 +136,9 @@ int main() {
 
   fp = fopen("hello.txt", "r");
   fp2 = fopen("text.txt","w");
+  fseek(fp,0,SEEK_END);
+  size_t file_size = ftell(fp);
+  rewind(fp);
 
   for(int i = 0; i < 16; i++)
   {
@@ -197,7 +200,7 @@ int main() {
   printf("\nTime: %0.3f ms\n", (end_time - start_time) * 1e3);
 
   // Read result
-  status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 32, output, 0, NULL, NULL);
+  status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * file_size, output, 0, NULL, NULL);
 
   for(int i = 0; i < 16; i++)
   {
