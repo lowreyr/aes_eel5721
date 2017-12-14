@@ -135,7 +135,7 @@ int main() {
   int c;
 
   fp = fopen("hello.txt", "r");
-  fp2 = fopen("text.txt","w");
+
   fseek(fp,0,SEEK_END);
   size_t file_size = ftell(fp);
   printf("Fiel size: %d\n",file_size);
@@ -203,13 +203,9 @@ int main() {
   // Read result
   status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 16, output, 0, NULL, NULL);
 
-  for(int i = 0; i < 16; i++)
-  {
-    fputc(output[i], fp2);
-  }
 
-  fclose(fp);
-  fclose(fp2);
+
+
 
   printf("\nAES output: ");
   for(int i=0; i<16; i++){
@@ -223,8 +219,13 @@ int main() {
   for(int i=0; i<16; i++){
     printf("%x",key[i]);
   }
-
-
+  fp2 = fopen("text.txt","w");
+  for(int i = 0; i < 16; i++)
+  {
+    fputc(output[i], fp2);
+  }
+  fclose(fp);
+  fclose(fp2);
   printf("\nKernel execution is complete.\n");
 
   // Free the resources allocated
