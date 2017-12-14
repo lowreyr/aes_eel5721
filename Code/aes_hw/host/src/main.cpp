@@ -107,6 +107,30 @@ int main() {
   uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
   uint8_t input[16];// = {0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x21, 0x21, 0x21, 0x21, 0x21};
 
+  FILE *fp;
+  FILE *fp2;
+  int c;
+
+  fp = fopen("hello.txt", "r");
+
+  fseek(fp,0,SEEK_END);
+  size_t file_size = ftell(fp);
+  printf("Fiel size: %d\n",file_size);
+  rewind(fp);
+
+  for(int i = 0; i < 16; i++)
+  {
+    if( feof(fp) )
+    {
+      input[i] = 0;
+    }
+    else
+    {
+      input[i] = fgetc(fp);
+    }
+    printf("%x",input[i]);
+  }
+
   cl_int status;
 
   if(!init()) {
@@ -129,30 +153,6 @@ int main() {
   size_t wgSize[3] = {work_group_size, 1, 1};
   size_t gSize[3] = {work_group_size, 1, 1};
   size_t size = 1;
-
-  FILE *fp;
-  FILE *fp2;
-  int c;
-
-  fp = fopen("hello.txt", "r");
-
-  fseek(fp,0,SEEK_END);
-  size_t file_size = ftell(fp);
-  printf("Fiel size: %d\n",file_size);
-  rewind(fp);
-
-  for(int i = 0; i < 16; i++)
-  {
-    if( feof(fp) )
-    {
-      input[i] = 0;
-    }
-    else
-    {
-      input[i] = fgetc(fp);
-    }
-    //printf("%x",input[i]);
-  }
 
   const double start_time = getCurrentTimestamp();
   // Launch the kernel
