@@ -126,7 +126,7 @@ int main() {
     for(int j = 0; j < 16; j++)
     {
       input[j] = fgetc(fp);
-      printf("%c",input[j]);
+      printf("%x",input[j]);
     }
 
     printf("\n");
