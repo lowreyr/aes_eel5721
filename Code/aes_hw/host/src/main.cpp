@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
   FILE *fp;
   FILE *fp2;
   int c;
-
+  printf("here\n");
   fp = fopen("../hello.txt", "r");
   fp2 = fopen("text.txt","w");
   printf("here");
