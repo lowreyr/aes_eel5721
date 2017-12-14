@@ -137,9 +137,6 @@ int main() {
   status = clSetKernelArg(addRoundKey10, 0, sizeof(cl_mem), &out_buffer);
   checkError(status, "Failed to set kernel arg 0");
 
-  printf("\nKernel initialization is complete.\n");
-  printf("Launching the kernel...\n\n");
-
   // Configure work set over which the kernel will execute
   size_t wgSize[3] = {work_group_size, 1, 1};
   size_t gSize[3] = {work_group_size, 1, 1};
@@ -189,7 +186,6 @@ int main() {
   const double end_time = getCurrentTimestamp();
 
   // Wall-clock time taken.
-  printf("\nTime: %0.3f ms\n", (end_time - start_time) * 1e3);
 
   // Read result
   status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 16, output, 0, NULL, NULL);

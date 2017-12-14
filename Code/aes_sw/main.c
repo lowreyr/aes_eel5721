@@ -32,16 +32,16 @@ int main(int argc, char *argv[])
         {
           input[j] = 0;
         }
-        encryptBlock((uint8_t*)input, key);
-        //decryptBlock((uint8_t*)input, key);
+        //encryptBlock((uint8_t*)input, key);
+        decryptBlock((uint8_t*)input, key);
         fputc(0, fp2);
         break ;
       }
       i = (i + 1)&0xF;
       if (i == 0)
       {
-        encryptBlock((uint8_t*)input, key);
-        //decryptBlock((uint8_t*)input, key);
+        //encryptBlock((uint8_t*)input, key);
+        decryptBlock((uint8_t*)input, key);
         for(int k = 0; k < 16; k++)
         {
           fputc(input[k], fp2);
