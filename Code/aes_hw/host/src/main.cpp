@@ -121,6 +121,8 @@ int main() {
   uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
   uint8_t input[16];
 
+  const double start_time = getCurrentTimestamp();
+  
   for(int i = 0; i < (file_size)/16; i++)
   {
     for(int j = 0; j < 16; j++)
@@ -196,6 +198,10 @@ int main() {
     fputc(output[i], fp2);
   }
 }
+const double end_time = getCurrentTimestamp();
+
+// Wall-clock time taken.
+printf("\nTime: %0.3f ms\n", (end_time - start_time) * 1e3);
   fputc('\0', fp2);
   fclose(fp);
   fclose(fp2);
