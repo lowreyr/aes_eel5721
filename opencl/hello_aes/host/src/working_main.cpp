@@ -101,19 +101,24 @@ static void device_info_string( cl_device_id device, cl_device_info param, const
 static void display_device_info( cl_device_id device );
 
 // Entry point.
-int main(int argc, char *argv[]) {
-
+int main() {
+  //int *key    = (int *)malloc(sizeof(uint8_t)*16);
+  //int *input  = (int *)malloc(sizeof(uint8_t)*16);
   uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*16);
-  uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
-  char input[16];
-  
+  //int *golden = (int *)malloc(sizeof(uint8_t)*16);
+  //for (int i=0; i<16; i++) {
+    uint8_t input[16] = {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff};
+    uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
+
+  //}
+
   cl_int status;
 
   if(!init()) {
     return -1;
   }
   key_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 16, key, &status);
-  in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 128, input, &status);
+  in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 16, input, &status);
   out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint8_t) * 16, NULL, &status);
 
   status = clSetKernelArg(addRoundKey0, 0, sizeof(cl_mem), &in_buffer);
@@ -129,28 +134,6 @@ int main(int argc, char *argv[]) {
   size_t wgSize[3] = {work_group_size, 1, 1};
   size_t gSize[3] = {work_group_size, 1, 1};
   size_t size = 1;
-
-  FILE *fp;
-  FILE *fp2;
-  int c;
-
-  fp2 = fopen("text.txt","w");
-
-  for (int i = 1; i < argc; i++)
-  {
-    fp = fopen(argv[i], "r");
-
-    if (fp == NULL)
-    {
-        fprintf(stderr, "cat: can't open %s\n", argv[i]);
-        continue;
-    }
-  }
-
-  for(int i = 0; i < 16; i++)
-  {
-    input[i] = fgetc(fp);
-  }
 
   // Launch the kernel
   status = clEnqueueNDRangeKernel(keyQueue, keyExpansion, 1, NULL, &size, &size, 0, NULL, NULL);
@@ -186,29 +169,6 @@ int main(int argc, char *argv[]) {
   status = clEnqueueNDRangeKernel(queue, shiftRows, 1, NULL, &size, &size, 0, NULL, NULL);
   status = clEnqueueNDRangeKernel(queue, addRoundKey10, 1, NULL, &size, &size, 0, NULL, NULL);
 
-  int i = 0;
-  do {
-      input[i] = fgetc(fp);
-      if( feof(fp) )
-      {
-        for(int j = i; j < 16; j++)
-        {
-          input[j] = 0;
-        }
-        fputc(0, fp2);
-        break ;
-      }
-      i = (i + 1)&0xF;
-      if (i == 0)
-      {
-        for(int k = 0; k < 16; k++)
-        {
-          fputc(output[k], fp2);
-        }
-      };
-   } while(1);
-
-
   checkError(status, "Failed to launch kernel");
 
   // Wait for command queue to complete pending events
@@ -216,8 +176,9 @@ int main(int argc, char *argv[]) {
   checkError(status, "Failed to finish");
 
   // Read result
-  status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 1024, output, 0, NULL, NULL);
-/*
+  status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 16, output, 0, NULL, NULL);
+
+/*  
   printf("\nAES output: ");
   for(int i=0; i<16; i++){
     printf("%x ",output[i]);
@@ -233,9 +194,6 @@ int main(int argc, char *argv[]) {
 */
 
   printf("\nKernel execution is complete.\n");
-
-    fclose(fp);
-    fclose(fp2);
 
   // Free the resources allocated
   cleanup();

@@ -6,8 +6,6 @@
 //#include "galois.h"
 //#include <opencl.h>
 
-//typedef uchar uint8_t; 
-
 #pragma OPENCL EXTENSION cl_intel_channels : enable
 
 //Substitution table
@@ -49,79 +47,144 @@ constant uchar sBoxInverse[256] = {
    	0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d,
   };
 
-constant uchar   roundCoefficients[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36};
-//Add other round coefficients
-//uint32_t  subKeys[44];
+// Channels between KeyExpansion and AddRoundKey kernels
+channel uchar ARK0toKE;
+channel uchar KEtoARK1;
+channel uchar KEtoARK2;
+channel uchar KEtoARK3;
+channel uchar KEtoARK4;
+channel uchar KEtoARK5;
+channel uchar KEtoARK6;
+channel uchar KEtoARK7;
+channel uchar KEtoARK8;
+channel uchar KEtoARK9;
+channel uchar KEtoARK10;
 
-channel uchar chb0;
-channel uchar chm0;
-channel uchar cha1;
+// Channels between AddRoundKey, ByteSubstitution, MixColumns, and ShiftRows kernels
+channel uchar ARK0toBS0;
+channel uchar BS0toMC0;
+channel uchar MC0toARK1;
+channel uchar ARK1toBS1;
+channel uchar BS1toMC1;
+channel uchar MC1toARK2;
+channel uchar ARK2toBS2;
+channel uchar BS2toMC2;
+channel uchar MC2toARK3;
+channel uchar ARK3toBS3;
+channel uchar BS3toMC3;
+channel uchar MC3toARK4;
+channel uchar ARK4toBS4;
+channel uchar BS4toMC4;
+channel uchar MC4toARK5;
+channel uchar ARK5toBS5;
+channel uchar BS5toMC5;
+channel uchar MC5toARK6;
+channel uchar ARK6toBS6;
+channel uchar BS6toMC6;
+channel uchar MC6toARK7;
+channel uchar ARK7toBS7;
+channel uchar BS7toMC7;
+channel uchar MC7toARK8;
+channel uchar ARK8toBS8;
+channel uchar BS8toMC8;
+channel uchar MC8toARK9;
+channel uchar ARK9toBS9;
+channel uchar BS9toSR;
+channel uchar SRtoARK10;
 
-channel uchar chr0;
-channel uchar chr1;
-channel uchar chr2;
-channel uchar chr3;
-channel uchar chr4;
-channel uchar chr5;
-channel uchar chr6;
-channel uchar chr7;
-channel uchar chr8;
-channel uchar chr9;
-channel uchar chr10;
 
 __kernel void addRoundKey0(__global uchar* state, __global uchar* roundKey)
 {
-  //for(int r = 0; r < 16; r++)
-  //{
-  //  state[r] = read_channel_intel(cha0);
-  //}
   uchar data;
   uchar key;
   uchar result;
-  printf("\naddRoundKey0: ");
+  //DEBUG printf("\naddRoundKey0: ");
   for(int i = 0; i < 16; i++)
   {
-    //uchar statePosition = i << 2;
-    //state[statePosition]     = state[statePosition]     ^ (*(roundKey + i) >> 24);
-    //state[statePosition + 1] = state[statePosition + 1] ^ ((*(roundKey + i) >> 16)&0xFF);
-    //state[statePosition + 2] = state[statePosition + 2] ^ ((*(roundKey + i) >> 8)&0xFF);
-    //state[statePosition + 3] = state[statePosition + 3] ^ (*(roundKey + i)&0xFF);
     data = state[i];
     key = roundKey[i];
     result = data ^ key;
-    //state[i] = state[i] ^ roundKey[i];
-    write_channel_intel(chb0, result);
-    write_channel_intel(chr0, key);
+
+    write_channel_intel(ARK0toBS0, result);
+    write_channel_intel(ARK0toKE, key);
     //printf("data: %x, key: %x, result: %x\n",data,key,result);
-    printf("%x ",result);
+    //DEBUG printf("%x ",result);
+  }
+}
+
+__kernel void keyExpansion()
+{
+  uchar roundCoefficients[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36};
+
+  uchar subKeys[176];
+  for(int j =0; j<16; j++)
+  {
+    subKeys[j] = read_channel_intel(ARK0toKE);
+  }
+
+  for(int i = 1; i < 11; i++)
+  {
+    uchar keyPosition = i << 4;
+
+    subKeys[keyPosition]      = subKeys[keyPosition - 16] ^ (sBox[subKeys[keyPosition - 3]] ^ roundCoefficients[i - 1]);
+    subKeys[keyPosition + 1]  = subKeys[keyPosition - 15] ^ (sBox[subKeys[keyPosition - 2]]);
+    subKeys[keyPosition + 2]  = subKeys[keyPosition - 14] ^ (sBox[subKeys[keyPosition - 1]]);
+    subKeys[keyPosition + 3]  = subKeys[keyPosition - 13] ^ (sBox[subKeys[keyPosition - 4]]);
+    subKeys[keyPosition + 4]  = subKeys[keyPosition - 12] ^ subKeys[keyPosition];
+    subKeys[keyPosition + 5]  = subKeys[keyPosition - 11] ^ subKeys[keyPosition + 1];
+    subKeys[keyPosition + 6]  = subKeys[keyPosition - 10] ^ subKeys[keyPosition + 2];
+    subKeys[keyPosition + 7]  = subKeys[keyPosition - 9]  ^ subKeys[keyPosition + 3];
+    subKeys[keyPosition + 8]  = subKeys[keyPosition - 8] ^ subKeys[keyPosition + 4];
+    subKeys[keyPosition + 9]  = subKeys[keyPosition - 7] ^ subKeys[keyPosition + 5];
+    subKeys[keyPosition + 10] = subKeys[keyPosition - 6] ^ subKeys[keyPosition + 6];
+    subKeys[keyPosition + 11] = subKeys[keyPosition - 5] ^ subKeys[keyPosition + 7];
+    subKeys[keyPosition + 12] = subKeys[keyPosition - 4] ^ subKeys[keyPosition + 8];
+    subKeys[keyPosition + 13] = subKeys[keyPosition - 3] ^ subKeys[keyPosition + 9];
+    subKeys[keyPosition + 14] = subKeys[keyPosition - 2] ^ subKeys[keyPosition + 10];
+    subKeys[keyPosition + 15] = subKeys[keyPosition - 1] ^ subKeys[keyPosition + 11];
+  }
+
+  // Write round Keys to corresponding AddRoundKey kernels
+  for(int k = 0; k<16; k++) 
+  {
+    write_channel_intel(KEtoARK1, subKeys[16 + k]);   // 1*16=16
+    write_channel_intel(KEtoARK2, subKeys[32 + k]);   // 2*16=32
+    write_channel_intel(KEtoARK3, subKeys[48 + k]);   // 3*16=48
+    write_channel_intel(KEtoARK4, subKeys[64 + k]);   // 4*16=64
+    write_channel_intel(KEtoARK5, subKeys[80 + k]);   // 5*16=80
+    write_channel_intel(KEtoARK6, subKeys[96 + k]);   // 6*16=96
+    write_channel_intel(KEtoARK7, subKeys[112 + k]);  // 7*16=112
+    write_channel_intel(KEtoARK8, subKeys[128 + k]);  // 8*16=128
+    write_channel_intel(KEtoARK9, subKeys[144 + k]);  // 9*16=144
+    write_channel_intel(KEtoARK10, subKeys[160 + k]); //10*16=160
   }
 }
 
 __kernel void byteSubstitution0()
 {
-  uchar temp;
-  printf("\nbyteSubstition0: ");
+  uchar state;
+  //DEBUG printf("\nbyteSubstition0: ");
   for(int i = 0; i < 16; i++)
   {
-    temp = read_channel_intel(chb0);
-    temp = sBox[temp];
-    printf("%x ",temp);
-    write_channel_intel(chm0, temp);
+    state = read_channel_intel(ARK0toBS0);
+    state = sBox[state];
+    //DEBUG printf("%x ",state);
+    write_channel_intel(BS0toMC0, state);
   }
 }
 
-__kernel void mixColumn0()//__global uchar* out)
+__kernel void mixColumn0()
 {
   uchar state[16];
   uchar tempState[16];
   uchar Bx2[16];
   uchar Bx3[16];
 
-  printf("\nmixColumn0: ");
+  //DEBUG printf("\nmixColumn0: ");
 
   for(int i = 0; i < 16; i++)
   {
-    state[i] = read_channel_intel(chm0);
+    state[i] = read_channel_intel(BS0toMC0);
     Bx2[i] = state[i] << 1;
     Bx3[i] = state[i] << 1 ^ state[i];
 
@@ -151,83 +214,704 @@ __kernel void mixColumn0()//__global uchar* out)
 
   for(int i = 0; i < 16; i++)
   {
-    //out[i] = tempState[i];
-    write_channel_intel(cha1, state[i]);
-    printf("%x ",tempState[i]);
+    write_channel_intel(MC0toARK1, tempState[i]);
+    //DEBUG printf("%x ",tempState[i]);
   }
 }
 
-//figuring this out: 
-__kernel void keyExpansion()//uint32_t* subKeys)
-{
-  uchar key[16];
-  uchar key1[16];
-  uchar key2[16];
-  uchar key3[16];
-  uchar key4[16];
-  uchar key5[16];
-  uchar key6[16];
-  uchar key7[16];
-  uchar key8[16];
-  uchar key9[16];
-  uchar key10[16];
-
-  for(int j=0; j<16; j++)
-  {
-    key[j] = read_channel_intel(chr0);
-  }
-
-  uint subKeys[44];
-  for(int i = 1; i < 11; i++)
-  {
-    uchar keyPosition = i << 2;
-    uint subKey = subKeys[keyPosition - 1];
-    uint gSubKey = ((sBox[(subKey >> 16)&0xFF] ^ roundCoefficients[i - 1]) << 24) | (sBox[(subKey >> 8)&0xFF] << 16) | (sBox[subKey&0xFF] << 8) | sBox[(subKey >> 24)&0xFF];
-
-    //subKeys[keyPosition]     = subKeys[keyPosition - 4] ^ g(subKeys[keyPosition - 1], roundCoefficients[i - 1]);
-    subKeys[keyPosition]     = subKeys[keyPosition - 4] ^ gSubKey;
-    subKeys[keyPosition + 1] = subKeys[keyPosition]     ^ subKeys[keyPosition - 3];
-    subKeys[keyPosition + 2] = subKeys[keyPosition + 1] ^ subKeys[keyPosition - 2];
-    subKeys[keyPosition + 3] = subKeys[keyPosition + 2] ^ subKeys[keyPosition - 1];
-  }
-
-  for(int k=0; k<16; k++)
-  {
-    write_channel_intel(chr1, key[k]); //FIXME: need to send key1[k]; using key[k] as temp filler
-//    write_channel_intel(chr2, key2[k]);
-//    write_channel_intel(chr3, key3[k]);
-//    write_channel_intel(chr4, key4[k]);
-//    write_channel_intel(chr5, key5[k]);
-//    write_channel_intel(chr6, key6[k]);
-//    write_channel_intel(chr7, key7[k]);
-//    write_channel_intel(chr8, key8[k]);
-//    write_channel_intel(chr9, key9[k]);
-//    write_channel_intel(chr10, key10[k]);
-  }
-}
-
-__kernel void addRoundKey1(__global uchar* out)
+__kernel void addRoundKey1()
 {
   uchar data;
   uchar key;
-  //uchar roundKey[16];
-  //roundKey = read_channel_intel(chr1);
   uchar result;
-  printf("\naddRoundKey1: ");
+  //DEBUG printf("\naddRoundKey1: ");
   for(int i = 0; i < 16; i++)
   {
-    //uchar statePosition = i << 2;
-    //state[statePosition]     = state[statePosition]     ^ (*(roundKey + i) >> 24);
-    //state[statePosition + 1] = state[statePosition + 1] ^ ((*(roundKey + i) >> 16)&0xFF);
-    //state[statePosition + 2] = state[statePosition + 2] ^ ((*(roundKey + i) >> 8)&0xFF);
-    //state[statePosition + 3] = state[statePosition + 3] ^ (*(roundKey + i)&0xFF);
-    data = read_channel_intel(cha1);//state[i];
-    key = read_channel_intel(chr1);//roundKey[i];
+    data = read_channel_intel(MC0toARK1);//state[i];
+    key = read_channel_intel(KEtoARK1);//roundKey[i];
     result = data ^ key;
-    //write_channel_intel(chb1, result);
+    write_channel_intel(ARK1toBS1, result);
+    //printf("\n\tdata: %x, key: %x, result: %x",data,key,result);
+    //DEBUG printf("%x ",result);
+  }
+}
+
+
+__kernel void byteSubstitution1()
+{
+  uchar state;
+  //DEBUG printf("\nbyteSubstition1: ");
+  for(int i = 0; i < 16; i++)
+  {
+    state = read_channel_intel(ARK1toBS1);
+    state = sBox[state];
+    //DEBUG printf("%x ",state);
+    write_channel_intel(BS1toMC1, state);
+  }
+}
+
+__kernel void mixColumn1()
+{
+  uchar state[16];
+  uchar tempState[16];
+  uchar Bx2[16];
+  uchar Bx3[16];
+
+  //DEBUG printf("\nmixColumn1: ");
+
+  for(int i = 0; i < 16; i++)
+  {
+    state[i] = read_channel_intel(BS1toMC1);
+    Bx2[i] = state[i] << 1;
+    Bx3[i] = state[i] << 1 ^ state[i];
+
+    if((state[i] & 0x80) != 0)
+    {
+      Bx2[i] ^= 0x1B;
+      Bx3[i] ^= 0x1B;
+    }
+  }
+
+  tempState[0]  =    Bx2[0] ^    Bx3[5] ^ state[10] ^ state[15];
+  tempState[1]  =  state[0] ^    Bx2[5] ^   Bx3[10] ^ state[15];
+  tempState[2]  =  state[0] ^  state[5] ^   Bx2[10] ^   Bx3[15];
+  tempState[3]  =    Bx3[0] ^  state[5] ^ state[10] ^   Bx2[15];
+  tempState[4]  =    Bx2[4] ^    Bx3[9] ^ state[14] ^  state[3];
+  tempState[5]  =  state[4] ^    Bx2[9] ^   Bx3[14] ^  state[3];
+  tempState[6]  =  state[4] ^  state[9] ^   Bx2[14] ^    Bx3[3];
+  tempState[7]  =    Bx3[4] ^  state[9] ^ state[14] ^    Bx2[3];
+  tempState[8]  =    Bx2[8] ^   Bx3[13] ^  state[2] ^  state[7];
+  tempState[9]  =  state[8] ^   Bx2[13] ^    Bx3[2] ^  state[7];
+  tempState[10] =  state[8] ^ state[13] ^    Bx2[2] ^    Bx3[7];
+  tempState[11] =    Bx3[8] ^ state[13] ^  state[2] ^    Bx2[7];
+  tempState[12] =   Bx2[12] ^    Bx3[1] ^  state[6] ^ state[11];
+  tempState[13] = state[12] ^    Bx2[1] ^    Bx3[6] ^ state[11];
+  tempState[14] = state[12] ^  state[1] ^    Bx2[6] ^   Bx3[11];
+  tempState[15] =   Bx3[12] ^  state[1] ^  state[6] ^   Bx2[11];
+
+  for(int i = 0; i < 16; i++)
+  {
+    write_channel_intel(MC1toARK2, tempState[i]);
+    //DEBUG printf("%x ",tempState[i]);
+  }
+}
+
+__kernel void addRoundKey2()
+{
+  uchar data;
+  uchar key;
+  uchar result;
+  //DEBUG printf("\naddRoundKey2: ");
+  for(int i = 0; i < 16; i++)
+  {
+    data = read_channel_intel(MC1toARK2);//state[i];
+    key = read_channel_intel(KEtoARK2);//roundKey[i];
+    result = data ^ key;
+    write_channel_intel(ARK2toBS2, result);
+    //printf("\n\tdata: %x, key: %x, result: %x",data,key,result);
+    //DEBUG printf("%x ",result);
+  }
+}
+
+
+__kernel void byteSubstitution2()
+{
+  uchar state;
+  //DEBUG printf("\nbyteSubstition2: ");
+  for(int i = 0; i < 16; i++)
+  {
+    state = read_channel_intel(ARK2toBS2);
+    state = sBox[state];
+    //DEBUG printf("%x ",state);
+    write_channel_intel(BS2toMC2, state);
+  }
+}
+
+__kernel void mixColumn2()
+{
+  uchar state[16];
+  uchar tempState[16];
+  uchar Bx2[16];
+  uchar Bx3[16];
+
+  //DEBUG printf("\nmixColumn2: ");
+
+  for(int i = 0; i < 16; i++)
+  {
+    state[i] = read_channel_intel(BS2toMC2);
+    Bx2[i] = state[i] << 1;
+    Bx3[i] = state[i] << 1 ^ state[i];
+
+    if((state[i] & 0x80) != 0)
+    {
+      Bx2[i] ^= 0x1B;
+      Bx3[i] ^= 0x1B;
+    }
+  }
+
+  tempState[0]  =    Bx2[0] ^    Bx3[5] ^ state[10] ^ state[15];
+  tempState[1]  =  state[0] ^    Bx2[5] ^   Bx3[10] ^ state[15];
+  tempState[2]  =  state[0] ^  state[5] ^   Bx2[10] ^   Bx3[15];
+  tempState[3]  =    Bx3[0] ^  state[5] ^ state[10] ^   Bx2[15];
+  tempState[4]  =    Bx2[4] ^    Bx3[9] ^ state[14] ^  state[3];
+  tempState[5]  =  state[4] ^    Bx2[9] ^   Bx3[14] ^  state[3];
+  tempState[6]  =  state[4] ^  state[9] ^   Bx2[14] ^    Bx3[3];
+  tempState[7]  =    Bx3[4] ^  state[9] ^ state[14] ^    Bx2[3];
+  tempState[8]  =    Bx2[8] ^   Bx3[13] ^  state[2] ^  state[7];
+  tempState[9]  =  state[8] ^   Bx2[13] ^    Bx3[2] ^  state[7];
+  tempState[10] =  state[8] ^ state[13] ^    Bx2[2] ^    Bx3[7];
+  tempState[11] =    Bx3[8] ^ state[13] ^  state[2] ^    Bx2[7];
+  tempState[12] =   Bx2[12] ^    Bx3[1] ^  state[6] ^ state[11];
+  tempState[13] = state[12] ^    Bx2[1] ^    Bx3[6] ^ state[11];
+  tempState[14] = state[12] ^  state[1] ^    Bx2[6] ^   Bx3[11];
+  tempState[15] =   Bx3[12] ^  state[1] ^  state[6] ^   Bx2[11];
+
+  for(int i = 0; i < 16; i++)
+  {
+    write_channel_intel(MC2toARK3, tempState[i]);
+    //DEBUG printf("%x ",tempState[i]);
+  }
+}
+
+__kernel void addRoundKey3()
+{
+  uchar data;
+  uchar key;
+  uchar result;
+  //DEBUG printf("\naddRoundKey3: ");
+  for(int i = 0; i < 16; i++)
+  {
+    data = read_channel_intel(MC2toARK3);//state[i];
+    key = read_channel_intel(KEtoARK3);//roundKey[i];
+    result = data ^ key;
+    write_channel_intel(ARK3toBS3, result);
+    //printf("\n\tdata: %x, key: %x, result: %x",data,key,result);
+    //DEBUG printf("%x ",result);
+  }
+}
+
+
+__kernel void byteSubstitution3()
+{
+  uchar state;
+  //DEBUG printf("\nbyteSubstition3: ");
+  for(int i = 0; i < 16; i++)
+  {
+    state = read_channel_intel(ARK3toBS3);
+    state = sBox[state];
+    //DEBUG printf("%x ",state);
+    write_channel_intel(BS3toMC3, state);
+  }
+}
+
+__kernel void mixColumn3()
+{
+  uchar state[16];
+  uchar tempState[16];
+  uchar Bx2[16];
+  uchar Bx3[16];
+
+  //DEBUG printf("\nmixColumn3: ");
+
+  for(int i = 0; i < 16; i++)
+  {
+    state[i] = read_channel_intel(BS3toMC3);
+    Bx2[i] = state[i] << 1;
+    Bx3[i] = state[i] << 1 ^ state[i];
+
+    if((state[i] & 0x80) != 0)
+    {
+      Bx2[i] ^= 0x1B;
+      Bx3[i] ^= 0x1B;
+    }
+  }
+
+  tempState[0]  =    Bx2[0] ^    Bx3[5] ^ state[10] ^ state[15];
+  tempState[1]  =  state[0] ^    Bx2[5] ^   Bx3[10] ^ state[15];
+  tempState[2]  =  state[0] ^  state[5] ^   Bx2[10] ^   Bx3[15];
+  tempState[3]  =    Bx3[0] ^  state[5] ^ state[10] ^   Bx2[15];
+  tempState[4]  =    Bx2[4] ^    Bx3[9] ^ state[14] ^  state[3];
+  tempState[5]  =  state[4] ^    Bx2[9] ^   Bx3[14] ^  state[3];
+  tempState[6]  =  state[4] ^  state[9] ^   Bx2[14] ^    Bx3[3];
+  tempState[7]  =    Bx3[4] ^  state[9] ^ state[14] ^    Bx2[3];
+  tempState[8]  =    Bx2[8] ^   Bx3[13] ^  state[2] ^  state[7];
+  tempState[9]  =  state[8] ^   Bx2[13] ^    Bx3[2] ^  state[7];
+  tempState[10] =  state[8] ^ state[13] ^    Bx2[2] ^    Bx3[7];
+  tempState[11] =    Bx3[8] ^ state[13] ^  state[2] ^    Bx2[7];
+  tempState[12] =   Bx2[12] ^    Bx3[1] ^  state[6] ^ state[11];
+  tempState[13] = state[12] ^    Bx2[1] ^    Bx3[6] ^ state[11];
+  tempState[14] = state[12] ^  state[1] ^    Bx2[6] ^   Bx3[11];
+  tempState[15] =   Bx3[12] ^  state[1] ^  state[6] ^   Bx2[11];
+
+  for(int i = 0; i < 16; i++)
+  {
+    write_channel_intel(MC3toARK4, tempState[i]);
+    //DEBUG printf("%x ",tempState[i]);
+  }
+}
+
+__kernel void addRoundKey4()
+{
+  uchar data;
+  uchar key;
+  uchar result;
+  //DEBUG printf("\naddRoundKey4: ");
+  for(int i = 0; i < 16; i++)
+  {
+    data = read_channel_intel(MC3toARK4);//state[i];
+    key = read_channel_intel(KEtoARK4);//roundKey[i];
+    result = data ^ key;
+    write_channel_intel(ARK4toBS4, result);
+    //printf("\n\tdata: %x, key: %x, result: %x",data,key,result);
+    //DEBUG printf("%x ",result);
+  }
+}
+
+
+__kernel void byteSubstitution4()
+{
+  uchar state;
+  //DEBUG printf("\nbyteSubstition4: ");
+  for(int i = 0; i < 16; i++)
+  {
+    state = read_channel_intel(ARK4toBS4);
+    state = sBox[state];
+    //DEBUG printf("%x ",state);
+    write_channel_intel(BS4toMC4, state);
+  }
+}
+
+__kernel void mixColumn4()
+{
+  uchar state[16];
+  uchar tempState[16];
+  uchar Bx2[16];
+  uchar Bx3[16];
+
+  //DEBUG printf("\nmixColumn4: ");
+
+  for(int i = 0; i < 16; i++)
+  {
+    state[i] = read_channel_intel(BS4toMC4);
+    Bx2[i] = state[i] << 1;
+    Bx3[i] = state[i] << 1 ^ state[i];
+
+    if((state[i] & 0x80) != 0)
+    {
+      Bx2[i] ^= 0x1B;
+      Bx3[i] ^= 0x1B;
+    }
+  }
+
+  tempState[0]  =    Bx2[0] ^    Bx3[5] ^ state[10] ^ state[15];
+  tempState[1]  =  state[0] ^    Bx2[5] ^   Bx3[10] ^ state[15];
+  tempState[2]  =  state[0] ^  state[5] ^   Bx2[10] ^   Bx3[15];
+  tempState[3]  =    Bx3[0] ^  state[5] ^ state[10] ^   Bx2[15];
+  tempState[4]  =    Bx2[4] ^    Bx3[9] ^ state[14] ^  state[3];
+  tempState[5]  =  state[4] ^    Bx2[9] ^   Bx3[14] ^  state[3];
+  tempState[6]  =  state[4] ^  state[9] ^   Bx2[14] ^    Bx3[3];
+  tempState[7]  =    Bx3[4] ^  state[9] ^ state[14] ^    Bx2[3];
+  tempState[8]  =    Bx2[8] ^   Bx3[13] ^  state[2] ^  state[7];
+  tempState[9]  =  state[8] ^   Bx2[13] ^    Bx3[2] ^  state[7];
+  tempState[10] =  state[8] ^ state[13] ^    Bx2[2] ^    Bx3[7];
+  tempState[11] =    Bx3[8] ^ state[13] ^  state[2] ^    Bx2[7];
+  tempState[12] =   Bx2[12] ^    Bx3[1] ^  state[6] ^ state[11];
+  tempState[13] = state[12] ^    Bx2[1] ^    Bx3[6] ^ state[11];
+  tempState[14] = state[12] ^  state[1] ^    Bx2[6] ^   Bx3[11];
+  tempState[15] =   Bx3[12] ^  state[1] ^  state[6] ^   Bx2[11];
+
+  for(int i = 0; i < 16; i++)
+  {
+    write_channel_intel(MC4toARK5, tempState[i]);
+    //DEBUG printf("%x ",tempState[i]);
+  }
+}
+
+__kernel void addRoundKey5()
+{
+  uchar data;
+  uchar key;
+  uchar result;
+  //DEBUG printf("\naddRoundKey5: ");
+  for(int i = 0; i < 16; i++)
+  {
+    data = read_channel_intel(MC4toARK5);//state[i];
+    key = read_channel_intel(KEtoARK5);//roundKey[i];
+    result = data ^ key;
+    write_channel_intel(ARK5toBS5, result);
+    //printf("\n\tdata: %x, key: %x, result: %x",data,key,result);
+    //DEBUG printf("%x ",result);
+  }
+}
+
+
+__kernel void byteSubstitution5()
+{
+  uchar state;
+  //DEBUG printf("\nbyteSubstition5: ");
+  for(int i = 0; i < 16; i++)
+  {
+    state = read_channel_intel(ARK5toBS5);
+    state = sBox[state];
+    //DEBUG printf("%x ",state);
+    write_channel_intel(BS5toMC5, state);
+  }
+}
+
+__kernel void mixColumn5()
+{
+  uchar state[16];
+  uchar tempState[16];
+  uchar Bx2[16];
+  uchar Bx3[16];
+
+  //DEBUG printf("\nmixColumn5: ");
+
+  for(int i = 0; i < 16; i++)
+  {
+    state[i] = read_channel_intel(BS5toMC5);
+    Bx2[i] = state[i] << 1;
+    Bx3[i] = state[i] << 1 ^ state[i];
+
+    if((state[i] & 0x80) != 0)
+    {
+      Bx2[i] ^= 0x1B;
+      Bx3[i] ^= 0x1B;
+    }
+  }
+
+  tempState[0]  =    Bx2[0] ^    Bx3[5] ^ state[10] ^ state[15];
+  tempState[1]  =  state[0] ^    Bx2[5] ^   Bx3[10] ^ state[15];
+  tempState[2]  =  state[0] ^  state[5] ^   Bx2[10] ^   Bx3[15];
+  tempState[3]  =    Bx3[0] ^  state[5] ^ state[10] ^   Bx2[15];
+  tempState[4]  =    Bx2[4] ^    Bx3[9] ^ state[14] ^  state[3];
+  tempState[5]  =  state[4] ^    Bx2[9] ^   Bx3[14] ^  state[3];
+  tempState[6]  =  state[4] ^  state[9] ^   Bx2[14] ^    Bx3[3];
+  tempState[7]  =    Bx3[4] ^  state[9] ^ state[14] ^    Bx2[3];
+  tempState[8]  =    Bx2[8] ^   Bx3[13] ^  state[2] ^  state[7];
+  tempState[9]  =  state[8] ^   Bx2[13] ^    Bx3[2] ^  state[7];
+  tempState[10] =  state[8] ^ state[13] ^    Bx2[2] ^    Bx3[7];
+  tempState[11] =    Bx3[8] ^ state[13] ^  state[2] ^    Bx2[7];
+  tempState[12] =   Bx2[12] ^    Bx3[1] ^  state[6] ^ state[11];
+  tempState[13] = state[12] ^    Bx2[1] ^    Bx3[6] ^ state[11];
+  tempState[14] = state[12] ^  state[1] ^    Bx2[6] ^   Bx3[11];
+  tempState[15] =   Bx3[12] ^  state[1] ^  state[6] ^   Bx2[11];
+
+  for(int i = 0; i < 16; i++)
+  {
+    write_channel_intel(MC5toARK6, tempState[i]);
+    //DEBUG printf("%x ",tempState[i]);
+  }
+}
+
+__kernel void addRoundKey6()
+{
+  uchar data;
+  uchar key;
+  uchar result;
+  //DEBUG printf("\naddRoundKey6: ");
+  for(int i = 0; i < 16; i++)
+  {
+    data = read_channel_intel(MC5toARK6);//state[i];
+    key = read_channel_intel(KEtoARK6);//roundKey[i];
+    result = data ^ key;
+    write_channel_intel(ARK6toBS6, result);
+    //printf("\n\tdata: %x, key: %x, result: %x",data,key,result);
+    //DEBUG printf("%x ",result);
+  }
+}
+
+
+__kernel void byteSubstitution6()
+{
+  uchar state;
+  //DEBUG printf("\nbyteSubstition6: ");
+  for(int i = 0; i < 16; i++)
+  {
+    state = read_channel_intel(ARK6toBS6);
+    state = sBox[state];
+    //DEBUG printf("%x ",state);
+    write_channel_intel(BS6toMC6, state);
+  }
+}
+
+__kernel void mixColumn6()
+{
+  uchar state[16];
+  uchar tempState[16];
+  uchar Bx2[16];
+  uchar Bx3[16];
+
+  //DEBUG printf("\nmixColumn6: ");
+
+  for(int i = 0; i < 16; i++)
+  {
+    state[i] = read_channel_intel(BS6toMC6);
+    Bx2[i] = state[i] << 1;
+    Bx3[i] = state[i] << 1 ^ state[i];
+
+    if((state[i] & 0x80) != 0)
+    {
+      Bx2[i] ^= 0x1B;
+      Bx3[i] ^= 0x1B;
+    }
+  }
+
+  tempState[0]  =    Bx2[0] ^    Bx3[5] ^ state[10] ^ state[15];
+  tempState[1]  =  state[0] ^    Bx2[5] ^   Bx3[10] ^ state[15];
+  tempState[2]  =  state[0] ^  state[5] ^   Bx2[10] ^   Bx3[15];
+  tempState[3]  =    Bx3[0] ^  state[5] ^ state[10] ^   Bx2[15];
+  tempState[4]  =    Bx2[4] ^    Bx3[9] ^ state[14] ^  state[3];
+  tempState[5]  =  state[4] ^    Bx2[9] ^   Bx3[14] ^  state[3];
+  tempState[6]  =  state[4] ^  state[9] ^   Bx2[14] ^    Bx3[3];
+  tempState[7]  =    Bx3[4] ^  state[9] ^ state[14] ^    Bx2[3];
+  tempState[8]  =    Bx2[8] ^   Bx3[13] ^  state[2] ^  state[7];
+  tempState[9]  =  state[8] ^   Bx2[13] ^    Bx3[2] ^  state[7];
+  tempState[10] =  state[8] ^ state[13] ^    Bx2[2] ^    Bx3[7];
+  tempState[11] =    Bx3[8] ^ state[13] ^  state[2] ^    Bx2[7];
+  tempState[12] =   Bx2[12] ^    Bx3[1] ^  state[6] ^ state[11];
+  tempState[13] = state[12] ^    Bx2[1] ^    Bx3[6] ^ state[11];
+  tempState[14] = state[12] ^  state[1] ^    Bx2[6] ^   Bx3[11];
+  tempState[15] =   Bx3[12] ^  state[1] ^  state[6] ^   Bx2[11];
+
+  for(int i = 0; i < 16; i++)
+  {
+    write_channel_intel(MC6toARK7, tempState[i]);
+    //DEBUG printf("%x ",tempState[i]);
+  }
+}
+
+__kernel void addRoundKey7()
+{
+  uchar data;
+  uchar key;
+  uchar result;
+  //DEBUG printf("\naddRoundKey7: ");
+  for(int i = 0; i < 16; i++)
+  {
+    data = read_channel_intel(MC6toARK7);//state[i];
+    key = read_channel_intel(KEtoARK7);//roundKey[i];
+    result = data ^ key;
+    write_channel_intel(ARK7toBS7, result);
+    //printf("\n\tdata: %x, key: %x, result: %x",data,key,result);
+    //DEBUG printf("%x ",result);
+  }
+}
+
+
+__kernel void byteSubstitution7()
+{
+  uchar state;
+  //DEBUG printf("\nbyteSubstition7: ");
+  for(int i = 0; i < 16; i++)
+  {
+    state = read_channel_intel(ARK7toBS7);
+    state = sBox[state];
+    //DEBUG printf("%x ",state);
+    write_channel_intel(BS7toMC7, state);
+  }
+}
+
+__kernel void mixColumn7()
+{
+  uchar state[16];
+  uchar tempState[16];
+  uchar Bx2[16];
+  uchar Bx3[16];
+
+  //DEBUG printf("\nmixColumn7: ");
+
+  for(int i = 0; i < 16; i++)
+  {
+    state[i] = read_channel_intel(BS7toMC7);
+    Bx2[i] = state[i] << 1;
+    Bx3[i] = state[i] << 1 ^ state[i];
+
+    if((state[i] & 0x80) != 0)
+    {
+      Bx2[i] ^= 0x1B;
+      Bx3[i] ^= 0x1B;
+    }
+  }
+
+  tempState[0]  =    Bx2[0] ^    Bx3[5] ^ state[10] ^ state[15];
+  tempState[1]  =  state[0] ^    Bx2[5] ^   Bx3[10] ^ state[15];
+  tempState[2]  =  state[0] ^  state[5] ^   Bx2[10] ^   Bx3[15];
+  tempState[3]  =    Bx3[0] ^  state[5] ^ state[10] ^   Bx2[15];
+  tempState[4]  =    Bx2[4] ^    Bx3[9] ^ state[14] ^  state[3];
+  tempState[5]  =  state[4] ^    Bx2[9] ^   Bx3[14] ^  state[3];
+  tempState[6]  =  state[4] ^  state[9] ^   Bx2[14] ^    Bx3[3];
+  tempState[7]  =    Bx3[4] ^  state[9] ^ state[14] ^    Bx2[3];
+  tempState[8]  =    Bx2[8] ^   Bx3[13] ^  state[2] ^  state[7];
+  tempState[9]  =  state[8] ^   Bx2[13] ^    Bx3[2] ^  state[7];
+  tempState[10] =  state[8] ^ state[13] ^    Bx2[2] ^    Bx3[7];
+  tempState[11] =    Bx3[8] ^ state[13] ^  state[2] ^    Bx2[7];
+  tempState[12] =   Bx2[12] ^    Bx3[1] ^  state[6] ^ state[11];
+  tempState[13] = state[12] ^    Bx2[1] ^    Bx3[6] ^ state[11];
+  tempState[14] = state[12] ^  state[1] ^    Bx2[6] ^   Bx3[11];
+  tempState[15] =   Bx3[12] ^  state[1] ^  state[6] ^   Bx2[11];
+
+  for(int i = 0; i < 16; i++)
+  {
+    write_channel_intel(MC7toARK8, tempState[i]);
+    //DEBUG printf("%x ",tempState[i]);
+  }
+}
+
+__kernel void addRoundKey8()
+{
+  uchar data;
+  uchar key;
+  uchar result;
+  //DEBUG printf("\naddRoundKey8: ");
+  for(int i = 0; i < 16; i++)
+  {
+    data = read_channel_intel(MC7toARK8);//state[i];
+    key = read_channel_intel(KEtoARK8);//roundKey[i];
+    result = data ^ key;
+    write_channel_intel(ARK8toBS8, result);
+    //printf("\n\tdata: %x, key: %x, result: %x",data,key,result);
+    //DEBUG printf("%x ",result);
+  }
+}
+
+
+__kernel void byteSubstitution8()
+{
+  uchar state;
+  //DEBUG printf("\nbyteSubstition8: ");
+  for(int i = 0; i < 16; i++)
+  {
+    state = read_channel_intel(ARK8toBS8);
+    state = sBox[state];
+    //DEBUG printf("%x ",state);
+    write_channel_intel(BS8toMC8, state);
+  }
+}
+
+__kernel void mixColumn8()
+{
+  uchar state[16];
+  uchar tempState[16];
+  uchar Bx2[16];
+  uchar Bx3[16];
+
+  //DEBUG printf("\nmixColumn8: ");
+
+  for(int i = 0; i < 16; i++)
+  {
+    state[i] = read_channel_intel(BS8toMC8);
+    Bx2[i] = state[i] << 1;
+    Bx3[i] = state[i] << 1 ^ state[i];
+
+    if((state[i] & 0x80) != 0)
+    {
+      Bx2[i] ^= 0x1B;
+      Bx3[i] ^= 0x1B;
+    }
+  }
+
+  tempState[0]  =    Bx2[0] ^    Bx3[5] ^ state[10] ^ state[15];
+  tempState[1]  =  state[0] ^    Bx2[5] ^   Bx3[10] ^ state[15];
+  tempState[2]  =  state[0] ^  state[5] ^   Bx2[10] ^   Bx3[15];
+  tempState[3]  =    Bx3[0] ^  state[5] ^ state[10] ^   Bx2[15];
+  tempState[4]  =    Bx2[4] ^    Bx3[9] ^ state[14] ^  state[3];
+  tempState[5]  =  state[4] ^    Bx2[9] ^   Bx3[14] ^  state[3];
+  tempState[6]  =  state[4] ^  state[9] ^   Bx2[14] ^    Bx3[3];
+  tempState[7]  =    Bx3[4] ^  state[9] ^ state[14] ^    Bx2[3];
+  tempState[8]  =    Bx2[8] ^   Bx3[13] ^  state[2] ^  state[7];
+  tempState[9]  =  state[8] ^   Bx2[13] ^    Bx3[2] ^  state[7];
+  tempState[10] =  state[8] ^ state[13] ^    Bx2[2] ^    Bx3[7];
+  tempState[11] =    Bx3[8] ^ state[13] ^  state[2] ^    Bx2[7];
+  tempState[12] =   Bx2[12] ^    Bx3[1] ^  state[6] ^ state[11];
+  tempState[13] = state[12] ^    Bx2[1] ^    Bx3[6] ^ state[11];
+  tempState[14] = state[12] ^  state[1] ^    Bx2[6] ^   Bx3[11];
+  tempState[15] =   Bx3[12] ^  state[1] ^  state[6] ^   Bx2[11];
+
+  for(int i = 0; i < 16; i++)
+  {
+    write_channel_intel(MC8toARK9, tempState[i]);
+    //DEBUG printf("%x ",tempState[i]);
+  }
+}
+
+__kernel void addRoundKey9()
+{
+  uchar data;
+  uchar key;
+  uchar result;
+  //DEBUG printf("\naddRoundKey9: ");
+  for(int i = 0; i < 16; i++)
+  {
+    data = read_channel_intel(MC8toARK9);//state[i];
+    key = read_channel_intel(KEtoARK9);//roundKey[i];
+    result = data ^ key;
+    write_channel_intel(ARK9toBS9, result);
+    //printf("\n\tdata: %x, key: %x, result: %x",data,key,result);
+    //DEBUG printf("%x ",result);
+  }
+}
+
+__kernel void byteSubstitution9()
+{
+  uchar state;
+  //DEBUG printf("\nbyteSubstition9: ");
+  for(int i = 0; i < 16; i++)
+  {
+    state = read_channel_intel(ARK9toBS9);
+    state = sBox[state];
+    //DEBUG printf("%x ",state);
+    write_channel_intel(BS9toSR, state);
+  }
+}
+
+__kernel void shiftRows()
+{
+  uchar state[16];
+  for(int r = 0; r < 16; r++)
+  {
+    state[r] = read_channel_intel(BS9toSR);
+  }
+  uchar tempState[16];
+
+  tempState[0]  = state[0];
+  tempState[1]  = state[5];
+  tempState[2]  = state[10];
+  tempState[3]  = state[15];
+  tempState[4]  = state[4];
+  tempState[5]  = state[9];
+  tempState[6]  = state[14];
+  tempState[7]  = state[3];
+  tempState[8]  = state[8];
+  tempState[9]  = state[13];
+  tempState[10] = state[2];
+  tempState[11] = state[7];
+  tempState[12] = state[12];
+  tempState[13] = state[1];
+  tempState[14] = state[6];
+  tempState[15] = state[11];
+
+  for(int i = 0; i < 16; i++)
+  {
+    write_channel_intel(SRtoARK10, tempState[i]);
+  }
+}
+
+
+// Last kernel in data pipe; write to output buffer 
+__kernel void addRoundKey10(__global uchar* out)
+{
+  uchar data;
+  uchar key;
+  uchar result;
+  //DEBUG printf("\naddRoundKey10: ");
+  for(int i = 0; i < 16; i++)
+  {
+    data = read_channel_intel(SRtoARK10);
+    key = read_channel_intel(KEtoARK10);
+    result = data ^ key;
     out[i] = result;
-    //printf("data: %x, key: %x, result: %x\n",data,key,result);
-    printf("%x ",result);
+    //DEBUG printf("%x ",result);
   }
 }
 
