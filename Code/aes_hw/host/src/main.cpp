@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
   fseek(fp,0,SEEK_END);
   size_t file_size = ftell(fp);
   fclose(fp);
-
+  printf("here\n");
   uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*file_size);
   uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
   uint8_t input[file_size];
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
   FILE *fp2;
 
   fp = fopen("../../rime.txt", "r");
-
+  printf("here\n");
   for(int i = 0; i < file_size; i++)
   {
     if( feof(fp) )
@@ -134,11 +134,11 @@ int main(int argc, char *argv[]) {
       input[i] = fgetc(fp);
     }
   }
-
+  printf("here3\n");
   key_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t)*16, key, &status);
   in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t)*(file_size-1), input, &status);
   out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint8_t)*(file_size-1), NULL, &status);
-
+  printf("here\n");
   status = clSetKernelArg(addRoundKey0, 0, sizeof(cl_mem), &in_buffer);
   status = clSetKernelArg(addRoundKey0, 1, sizeof(cl_mem), &key_buffer);
   status = clSetKernelArg(addRoundKey10, 0, sizeof(cl_mem), &out_buffer);
@@ -188,17 +188,7 @@ int main(int argc, char *argv[]) {
   status = clEnqueueNDRangeKernel(queue, addRoundKey10, 1, NULL, &size, &size, 0, NULL, NULL);
 
   checkError(status, "Failed to launch kernel");
-  for(int i = 0; i < file_size-1; i++)
-  {
-    if( feof(fp) )
-    {
-      input[i] = 0;
-    }
-    else
-    {
-      input[i] = fgetc(fp);
-    }
-  }
+  
   // Wait for command queue to complete pending events
   status = clFinish(queue);
   checkError(status, "Failed to finish");
