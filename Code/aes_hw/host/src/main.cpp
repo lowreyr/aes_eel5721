@@ -114,14 +114,12 @@ int main() {
 
   fp = fopen("hello.txt", "r");
   fseek(fp,0,SEEK_END);
-  printf("here2\n");
   size_t file_size = ftell(fp);
 
   uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*file_size);
   uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
   uint8_t input[file_size];
 
-  printf("here\n");
   for(int i = 0; i < file_size; i++)
   {
     if( feof(fp) )
@@ -134,13 +132,12 @@ int main() {
     }
   }
 
-  printf("here3\n");
   key_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t)*16, key, &status);
   in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t)*(file_size-1), input, &status);
   out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint8_t)*(file_size-1), NULL, &status);
-  printf("here\n");
+
   status = clSetKernelArg(addRoundKey0, 0, sizeof(cl_mem), &in_buffer);
-  status = clSetKernelArg(addRoundKey0, 1, sizeof(cl_mem), &key_buffer);
+  status = clSetKernelArg(addRoundKey0, 1, sizeof(cl_mem), &key);
   status = clSetKernelArg(addRoundKey10, 0, sizeof(cl_mem), &out_buffer);
   checkError(status, "Failed to set kernel arg 0");
 
