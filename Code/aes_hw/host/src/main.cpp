@@ -113,7 +113,7 @@ int main() {
     return -1;
   }
   key_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 16, key, &status);
-  in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 128, input, &status);
+  in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 16, input, &status);
   out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint8_t) * 16, NULL, &status);
 
   status = clSetKernelArg(addRoundKey0, 0, sizeof(cl_mem), &in_buffer);
