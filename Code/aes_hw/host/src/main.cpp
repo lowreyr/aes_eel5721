@@ -106,16 +106,16 @@ int main() {
   uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*16);
   uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
   uint8_t input[16];// = {0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x21, 0x21, 0x21, 0x21, 0x21};
-
+  printf("here\n");
   FILE *fp;
   FILE *fp2;
   int c;
 
   fp = fopen("hello.txt", "r");
-
+  printf("here\n");
   fseek(fp,0,SEEK_END);
   size_t file_size = ftell(fp);
-  printf("Fiel size: %d\n",file_size);
+  printf("File size: %d\n",file_size);
   rewind(fp);
 
   for(int i = 0; i < 16; i++)
@@ -130,7 +130,7 @@ int main() {
     }
     printf("%x",input[i]);
   }
-
+  printf("here\n");
   cl_int status;
 
   if(!init()) {
@@ -145,7 +145,7 @@ int main() {
   status = clSetKernelArg(addRoundKey10, 0, sizeof(cl_mem), &out_buffer);
   checkError(status, "Failed to set kernel arg 0");
 
-
+  printf("here\n");
   printf("\nKernel initialization is complete.\n");
   printf("Launching the kernel...\n\n");
 
