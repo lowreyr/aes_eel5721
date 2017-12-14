@@ -98,11 +98,12 @@ __kernel void addRoundKey0(__global uchar* state, __global uchar* roundKey)
   uchar data;
   uchar key;
   uchar result;
+  uchar keys[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
   //DEBUG printf("\naddRoundKey0: ");
   for(int i = 0; i < 16; i++)
   {
     data = state[i];
-    key = roundKey[i];
+    key = keys[i];
     result = data ^ key;
 
     write_channel_intel(ARK0toBS0, result);
