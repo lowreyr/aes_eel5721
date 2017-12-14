@@ -112,7 +112,7 @@ int main() {
   FILE *fp;
   FILE *fp2;
 
-  fp = fopen("rime.txt", "r");
+  fp = fopen("rime_small.txt", "r");
   fp2 = fopen("text.txt","w");
   fseek(fp,0,SEEK_END);
   size_t file_size = ftell(fp);
