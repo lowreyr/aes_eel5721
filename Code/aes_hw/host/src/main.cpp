@@ -139,8 +139,7 @@ int main(int argc, char *argv[]) {
   printf("here\n");
   for(int i = 0; i < 16; i++)
   {
-    //input[i] = fgetc(fp);
-    printf("%c",fgetc(fp));
+    input[i] = fgetc(fp);
   }
 
   const double start_time = getCurrentTimestamp();
@@ -191,12 +190,12 @@ int main(int argc, char *argv[]) {
 
   // Read result
   status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 16, output, 0, NULL, NULL);
-  printf("here");
+
   for(int i = 0; i < 16; i++)
   {
     output[i] = fgetc(fp);
   }
-  printf("here");
+  
   fclose(fp);
   fclose(fp2);
 
