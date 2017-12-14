@@ -151,7 +151,7 @@ int main() {
     {
       input[i] = fgetc(fp);
     }
-    printf("%x",input[i]);
+    //printf("%x",input[i]);
   }
 
   const double start_time = getCurrentTimestamp();
