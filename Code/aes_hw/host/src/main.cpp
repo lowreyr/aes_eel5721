@@ -101,7 +101,7 @@ static void device_info_string( cl_device_id device, cl_device_info param, const
 static void display_device_info( cl_device_id device );
 
 // Entry point.
-int main() {
+int main(int argv, char* argc[]) {
 
   uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*16);
   uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
@@ -147,10 +147,6 @@ int main() {
     }
   }
 
-  for(int i = 0; i < 16; i++)
-  {
-    input[i] = fgetc(fp);
-  }
   const double start_time = getCurrentTimestamp();
   // Launch the kernel
   status = clEnqueueNDRangeKernel(keyQueue, keyExpansion, 1, NULL, &size, &size, 0, NULL, NULL);
@@ -186,31 +182,6 @@ int main() {
   status = clEnqueueNDRangeKernel(queue, shiftRows, 1, NULL, &size, &size, 0, NULL, NULL);
   status = clEnqueueNDRangeKernel(queue, addRoundKey10, 1, NULL, &size, &size, 0, NULL, NULL);
 
-  i = 0;
-  do {
-      input[i] = fgetc(fp);
-      if( feof(fp) )
-      {
-        for(int j = i; j < 16; j++)
-        {
-          input[j] = 0;
-        }
-        fputc(0, fp2);
-        break ;
-      }
-      i = (i + 1)&0xF;
-      if (i == 0)
-      {
-        for(int k = 0; k < 16; k++)
-        {
-          fputc(input[k], fp2);
-        }
-      };
-   } while(1);
-
-    fclose(fp);
-    fclose(fp2);
-
   checkError(status, "Failed to launch kernel");
 
   // Wait for command queue to complete pending events
@@ -224,6 +195,15 @@ int main() {
 
   // Read result
   status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 16, output, 0, NULL, NULL);
+
+  for(int i = 0; i < 16; i++)
+  {
+    output[i] = fgetc(fp);
+  }
+
+  fclose(fp);
+  fclose(fp2);
+
   printf("\nAES output: ");
   for(int i=0; i<16; i++){
     printf("%x ",output[i]);

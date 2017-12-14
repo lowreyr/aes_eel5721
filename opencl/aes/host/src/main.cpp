@@ -201,6 +201,9 @@ int main(int argv, char* argc[]) {
     output[i] = fgetc(fp);
   }
 
+  fclose(fp);
+  fclose(fp2);
+  
   printf("\nAES output: ");
   for(int i=0; i<16; i++){
     printf("%x ",output[i]);
