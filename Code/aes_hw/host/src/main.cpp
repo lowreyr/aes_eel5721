@@ -201,7 +201,7 @@ int main() {
   {
     fputc(output[i], fp2);
   }
-  cleanup();
+  
 }
   fclose(fp);
   fclose(fp2);
