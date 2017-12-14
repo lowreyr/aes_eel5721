@@ -137,6 +137,7 @@ int main() {
   fp2 = fopen("text.txt","w");
   fseek(fp,0,SEEK_END);
   size_t file_size = ftell(fp);
+  printf("Fiel size: %d\n",file_size)
   rewind(fp);
 
   uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*file_size);
