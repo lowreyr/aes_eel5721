@@ -53,9 +53,39 @@ static cl_platform_id platform = NULL;
 static cl_device_id device = NULL;
 static cl_context context = NULL;
 static cl_command_queue queue = NULL;
+static cl_command_queue keyQueue = NULL;
 static cl_kernel addRoundKey0 = NULL;
+static cl_kernel addRoundKey1 = NULL;
+static cl_kernel addRoundKey2 = NULL;
+static cl_kernel addRoundKey3 = NULL;
+static cl_kernel addRoundKey4 = NULL;
+static cl_kernel addRoundKey5 = NULL;
+static cl_kernel addRoundKey6 = NULL;
+static cl_kernel addRoundKey7 = NULL;
+static cl_kernel addRoundKey8 = NULL;
+static cl_kernel addRoundKey9 = NULL;
+static cl_kernel addRoundKey10 = NULL;
 static cl_kernel byteSubstitution0 = NULL;
+static cl_kernel byteSubstitution1 = NULL;
+static cl_kernel byteSubstitution2 = NULL;
+static cl_kernel byteSubstitution3 = NULL;
+static cl_kernel byteSubstitution4 = NULL;
+static cl_kernel byteSubstitution5 = NULL;
+static cl_kernel byteSubstitution6 = NULL;
+static cl_kernel byteSubstitution7 = NULL;
+static cl_kernel byteSubstitution8 = NULL;
+static cl_kernel byteSubstitution9 = NULL;
+static cl_kernel keyExpansion = NULL;
 static cl_kernel mixColumn0 = NULL;
+static cl_kernel mixColumn1 = NULL;
+static cl_kernel mixColumn2 = NULL;
+static cl_kernel mixColumn3 = NULL;
+static cl_kernel mixColumn4 = NULL;
+static cl_kernel mixColumn5 = NULL;
+static cl_kernel mixColumn6 = NULL;
+static cl_kernel mixColumn7 = NULL;
+static cl_kernel mixColumn8 = NULL;
+static cl_kernel shiftRows = NULL;
 static cl_program program = NULL;
 static cl_mem key_buffer = NULL;
 static cl_mem in_buffer = NULL;
@@ -72,15 +102,10 @@ static void display_device_info( cl_device_id device );
 
 // Entry point.
 int main() {
-  //int *key    = (int *)malloc(sizeof(uint8_t)*16);
-  //int *input  = (int *)malloc(sizeof(uint8_t)*16);
-  uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*16);
-  //int *golden = (int *)malloc(sizeof(uint8_t)*16);
-  //for (int i=0; i<16; i++) {
-    uint8_t input[16] = {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff};
-    uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
 
-  //}
+  uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*16);
+  uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
+  char input[16];
 
   cl_int status;
 
@@ -88,14 +113,12 @@ int main() {
     return -1;
   }
   key_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 16, key, &status);
-  in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 16, input, &status);
+  in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 128, input, &status);
   out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint8_t) * 16, NULL, &status);
-
 
   status = clSetKernelArg(addRoundKey0, 0, sizeof(cl_mem), &in_buffer);
   status = clSetKernelArg(addRoundKey0, 1, sizeof(cl_mem), &key_buffer);
-  status = clSetKernelArg(addRoundKey0, 2, sizeof(cl_mem), &out_buffer);
-  //status = clSetKernelArg(mixColumn0, 0, sizeof(cl_mem), &out_buffer);
+  status = clSetKernelArg(addRoundKey10, 0, sizeof(cl_mem), &out_buffer);
   checkError(status, "Failed to set kernel arg 0");
 
 
@@ -107,15 +130,97 @@ int main() {
   size_t gSize[3] = {work_group_size, 1, 1};
   size_t size = 1;
 
+  FILE *fp;
+  FILE *fp2;
+  int c;
+
+  fp2 = fopen("text.txt","w");
+
+  for (int i = 1; i < argc; i++)
+  {
+    fp = fopen(argv[i], "r");
+
+    if (fp == NULL)
+    {
+        fprintf(stderr, "cat: can't open %s\n", argv[i]);
+        continue;
+    }
+  }
+
+  for(int i = 0; i < 16; i++)
+  {
+    input[i] = fgetc(fp);
+  }
+  const double start_time = getCurrentTimestamp();
   // Launch the kernel
+  status = clEnqueueNDRangeKernel(keyQueue, keyExpansion, 1, NULL, &size, &size, 0, NULL, NULL);
   status = clEnqueueNDRangeKernel(queue, addRoundKey0, 1, NULL, &size, &size, 0, NULL, NULL);
-  //status = clEnqueueNDRangeKernel(queue, byteSubstitution0, 1, NULL, &size, &size, 0, NULL, NULL);
-  //status = clEnqueueNDRangeKernel(queue, mixColumn0, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, byteSubstitution0, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, mixColumn0, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, addRoundKey1, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, byteSubstitution1, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, mixColumn1, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, addRoundKey2, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, byteSubstitution2, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, mixColumn2, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, addRoundKey3, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, byteSubstitution3, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, mixColumn3, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, addRoundKey4, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, byteSubstitution4, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, mixColumn4, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, addRoundKey5, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, byteSubstitution5, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, mixColumn5, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, addRoundKey6, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, byteSubstitution6, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, mixColumn6, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, addRoundKey7, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, byteSubstitution7, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, mixColumn7, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, addRoundKey8, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, byteSubstitution8, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, mixColumn8, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, addRoundKey9, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, byteSubstitution9, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, shiftRows, 1, NULL, &size, &size, 0, NULL, NULL);
+  status = clEnqueueNDRangeKernel(queue, addRoundKey10, 1, NULL, &size, &size, 0, NULL, NULL);
+
+  i = 0;
+  do {
+      input[i] = fgetc(fp);
+      if( feof(fp) )
+      {
+        for(int j = i; j < 16; j++)
+        {
+          input[j] = 0;
+        }
+        fputc(0, fp2);
+        break ;
+      }
+      i = (i + 1)&0xF;
+      if (i == 0)
+      {
+        for(int k = 0; k < 16; k++)
+        {
+          fputc(input[k], fp2);
+        }
+      };
+   } while(1);
+
+    fclose(fp);
+    fclose(fp2);
+
   checkError(status, "Failed to launch kernel");
 
   // Wait for command queue to complete pending events
   status = clFinish(queue);
   checkError(status, "Failed to finish");
+
+  const double end_time = getCurrentTimestamp();
+
+  // Wall-clock time taken.
+  printf("\nTime: %0.3f ms\n", (end_time - start_time) * 1e3);
 
   // Read result
   status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 16, output, 0, NULL, NULL);
@@ -188,6 +293,7 @@ bool init() {
 
   // Create the command queue.
   queue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
+  keyQueue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &status);
   checkError(status, "Failed to create command queue");
 
   // Create the program.
@@ -203,9 +309,38 @@ bool init() {
   // original CL file, that was compiled into an AOCX file using the AOC tool
   //const char *kernel_name = "hello_world";  // Kernel name, as defined in the CL file
   //kernel = clCreateKernel(program, kernel_name, &status);
+  keyExpansion = clCreateKernel(program, "keyExpansion", &status);
   addRoundKey0 = clCreateKernel(program, "addRoundKey0", &status);
-  //byteSubstitution0 = clCreateKernel(program, "byteSubstitution0", &status);
-  //mixColumn0 = clCreateKernel(program, "mixColumn0", &status);
+  byteSubstitution0 = clCreateKernel(program, "byteSubstitution0", &status);
+  mixColumn0 = clCreateKernel(program, "mixColumn0", &status);
+  addRoundKey1 = clCreateKernel(program, "addRoundKey1", &status);
+  byteSubstitution1 = clCreateKernel(program, "byteSubstitution1", &status);
+  mixColumn1 = clCreateKernel(program, "mixColumn1", &status);
+  addRoundKey2 = clCreateKernel(program, "addRoundKey2", &status);
+  byteSubstitution2 = clCreateKernel(program, "byteSubstitution2", &status);
+  mixColumn2 = clCreateKernel(program, "mixColumn2", &status);
+  addRoundKey3 = clCreateKernel(program, "addRoundKey3", &status);
+  byteSubstitution3 = clCreateKernel(program, "byteSubstitution3", &status);
+  mixColumn3 = clCreateKernel(program, "mixColumn3", &status);
+  addRoundKey4 = clCreateKernel(program, "addRoundKey4", &status);
+  byteSubstitution4 = clCreateKernel(program, "byteSubstitution4", &status);
+  mixColumn4 = clCreateKernel(program, "mixColumn4", &status);
+  addRoundKey5 = clCreateKernel(program, "addRoundKey5", &status);
+  byteSubstitution5 = clCreateKernel(program, "byteSubstitution5", &status);
+  mixColumn5 = clCreateKernel(program, "mixColumn5", &status);
+  addRoundKey6 = clCreateKernel(program, "addRoundKey6", &status);
+  byteSubstitution6 = clCreateKernel(program, "byteSubstitution6", &status);
+  mixColumn6 = clCreateKernel(program, "mixColumn6", &status);
+  addRoundKey7 = clCreateKernel(program, "addRoundKey7", &status);
+  byteSubstitution7 = clCreateKernel(program, "byteSubstitution7", &status);
+  mixColumn7 = clCreateKernel(program, "mixColumn7", &status);
+  addRoundKey8 = clCreateKernel(program, "addRoundKey8", &status);
+  byteSubstitution8 = clCreateKernel(program, "byteSubstitution8", &status);
+  mixColumn8 = clCreateKernel(program, "mixColumn8", &status);
+  addRoundKey9 = clCreateKernel(program, "addRoundKey9", &status);
+  byteSubstitution9 = clCreateKernel(program, "byteSubstitution9", &status);
+  shiftRows = clCreateKernel(program, "shiftRows", &status);
+  addRoundKey10 = clCreateKernel(program, "addRoundKey10", &status);
   checkError(status, "Failed to create kernels");
 
   return true;
@@ -213,6 +348,9 @@ bool init() {
 
 // Free the resources allocated during initialization
 void cleanup() {
+  if(keyExpansion) {
+    clReleaseKernel(keyExpansion);
+  }
   if(addRoundKey0) {
     clReleaseKernel(addRoundKey0);
   }
@@ -222,11 +360,98 @@ void cleanup() {
   if(mixColumn0) {
     clReleaseKernel(mixColumn0);
   }
+  if(addRoundKey1) {
+    clReleaseKernel(addRoundKey1);
+  }
+  if(byteSubstitution1) {
+    clReleaseKernel(byteSubstitution1);
+  }
+  if(mixColumn1) {
+    clReleaseKernel(mixColumn1);
+  }
+  if(addRoundKey2) {
+    clReleaseKernel(addRoundKey2);
+  }
+  if(byteSubstitution2) {
+    clReleaseKernel(byteSubstitution2);
+  }
+  if(mixColumn2) {
+    clReleaseKernel(mixColumn2);
+  }
+  if(addRoundKey3) {
+    clReleaseKernel(addRoundKey3);
+  }
+  if(byteSubstitution3) {
+    clReleaseKernel(byteSubstitution3);
+  }
+  if(mixColumn3) {
+    clReleaseKernel(mixColumn3);
+  }
+  if(addRoundKey4) {
+    clReleaseKernel(addRoundKey4);
+  }
+  if(byteSubstitution4) {
+    clReleaseKernel(byteSubstitution4);
+  }
+  if(mixColumn4) {
+    clReleaseKernel(mixColumn4);
+  }
+  if(addRoundKey5) {
+    clReleaseKernel(addRoundKey5);
+  }
+  if(byteSubstitution5) {
+    clReleaseKernel(byteSubstitution5);
+  }
+  if(mixColumn5) {
+    clReleaseKernel(mixColumn5);
+  }
+  if(addRoundKey6) {
+    clReleaseKernel(addRoundKey6);
+  }
+  if(byteSubstitution6) {
+    clReleaseKernel(byteSubstitution6);
+  }
+  if(mixColumn6) {
+    clReleaseKernel(mixColumn6);
+  }
+  if(addRoundKey7) {
+    clReleaseKernel(addRoundKey7);
+  }
+  if(byteSubstitution7) {
+    clReleaseKernel(byteSubstitution7);
+  }
+  if(mixColumn7) {
+    clReleaseKernel(mixColumn7);
+  }
+  if(addRoundKey8) {
+    clReleaseKernel(addRoundKey8);
+  }
+  if(byteSubstitution8) {
+    clReleaseKernel(byteSubstitution8);
+  }
+  if(mixColumn8) {
+    clReleaseKernel(mixColumn8);
+  }
+  if(addRoundKey9) {
+    clReleaseKernel(addRoundKey9);
+  }
+  if(byteSubstitution9) {
+    clReleaseKernel(byteSubstitution9);
+  }
+  if(shiftRows) {
+    clReleaseKernel(shiftRows);
+  }
+  if(addRoundKey10) {
+    clReleaseKernel(addRoundKey10);
+  }
   if(program) {
     clReleaseProgram(program);
   }
   if(queue) {
     clReleaseCommandQueue(queue);
+  }
+  if(keyQueue) {
+    clReleaseCommandQueue(keyQueue);
   }
   if(context) {
     clReleaseContext(context);

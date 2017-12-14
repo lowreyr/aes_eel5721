@@ -44,7 +44,6 @@ constant uchar sBoxInverse[256] = {
    	0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d,
   };
 
-constant uchar   roundCoeffients[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36};
 //Add other round coeffiencients
 //uint32_t  subKeys[44];
 
@@ -166,25 +165,34 @@ __kernel void addRoundKey0(__global uchar* state, __global uchar* roundKey,  __g
 //   }
 // }
 
-//figuring this out:
-// __kernel void keyExpansion()//uint32_t* subKeys)
-// {
-//   uchar key[16];
-//   key = read_channel_intel(chr0);
-//   uint32 subKeys[44];
-//   for(int i = 1; i < 11; i++)
-//   {
-//     uchar keyPosition = i << 2;
-//     uint32 subKey = subKeys[keyPosition - 1];
-//     uint32 gSubKey = ((sBox[(subKey >> 16)&0xFF] ^ roundCoefficients[i - 1]) << 24) | (sBox[(subKey >> 8)&0xFF] << 16) | (sBox[subKey&0xFF] << 8) | sBox[(subKey >> 24)&0xFF];
-//
-//     //subKeys[keyPosition]     = subKeys[keyPosition - 4] ^ g(subKeys[keyPosition - 1], roundCoefficients[i - 1]);
-//     subKeys[keyPosition]     = subKeys[keyPosition - 4] ^ gSubKey;
-//     subKeys[keyPosition + 1] = subKeys[keyPosition]     ^ subKeys[keyPosition - 3];
-//     subKeys[keyPosition + 2] = subKeys[keyPosition + 1] ^ subKeys[keyPosition - 2];
-//     subKeys[keyPosition + 3] = subKeys[keyPosition + 2] ^ subKeys[keyPosition - 1];
-//   }
-// }
+figuring this out:
+__kernel void keyExpansion()//uint32_t* subKeys)
+{
+  constant uchar   roundCoeffients[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36};
+
+  key = read_channel_intel(chr0);
+  for(int i = 1; i < 11; i++)
+  {
+    uchar keyPosition = i << 4;
+
+    subKeys[keyPosition]      = subKeys[keyPosition - 16] ^ (sBox[subKeys[keyPosition - 3]] ^ roundCoefficients[i - 1]);
+    subKeys[keyPosition + 1]  = subKeys[keyPosition - 15] ^ (sBox[subKeys[keyPosition - 2]]);
+    subKeys[keyPosition + 2]  = subKeys[keyPosition - 14] ^ (sBox[subKeys[keyPosition - 1]]);
+    subKeys[keyPosition + 3]  = subKeys[keyPosition - 13] ^ (sBox[subKeys[keyPosition - 4]]);
+    subKeys[keyPosition + 4]  = subKeys[keyPosition - 12] ^ subKeys[keyPosition];
+    subKeys[keyPosition + 5]  = subKeys[keyPosition - 11] ^ subKeys[keyPosition + 1];
+    subKeys[keyPosition + 6]  = subKeys[keyPosition - 10] ^ subKeys[keyPosition + 2];
+    subKeys[keyPosition + 7]  = subKeys[keyPosition - 9]  ^ subKeys[keyPosition + 3];
+    subKeys[keyPosition + 8]  = subKeys[keyPosition - 8] ^ subKeys[keyPosition + 4];
+    subKeys[keyPosition + 9]  = subKeys[keyPosition - 7] ^ subKeys[keyPosition + 5];
+    subKeys[keyPosition + 10] = subKeys[keyPosition - 6] ^ subKeys[keyPosition + 6];
+    subKeys[keyPosition + 11] = subKeys[keyPosition - 5] ^ subKeys[keyPosition + 7];
+    subKeys[keyPosition + 12] = subKeys[keyPosition - 4] ^ subKeys[keyPosition + 8];
+    subKeys[keyPosition + 13] = subKeys[keyPosition - 3] ^ subKeys[keyPosition + 9];
+    subKeys[keyPosition + 14] = subKeys[keyPosition - 2] ^ subKeys[keyPosition + 10];
+    subKeys[keyPosition + 15] = subKeys[keyPosition - 1] ^ subKeys[keyPosition + 11];
+  }
+}
 
 // __kernel void addRoundKey1(__global uchar* out)
 // {
