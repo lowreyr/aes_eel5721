@@ -145,7 +145,6 @@ int main() {
   {
     if( feof(fp) )
     {
-      printf("here");
       input[i] = 0;
     }
     else
@@ -218,7 +217,7 @@ int main() {
   }
   printf("\ninput: ");
   for(int i=0; i<16; i++){
-    printf("%x",input[i]);
+    printf("0x%x, ",input[i]);
   }
   printf("\nkey: ");
   for(int i=0; i<16; i++){
