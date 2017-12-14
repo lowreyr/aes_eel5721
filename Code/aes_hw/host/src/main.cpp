@@ -103,6 +103,7 @@ static void display_device_info( cl_device_id device );
 // Entry point.
 int main() {
 
+  uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*16);
   uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
   uint8_t input[16];
 
@@ -140,12 +141,11 @@ int main() {
   printf("Fiel size: %d\n",file_size);
   rewind(fp);
 
-  uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*file_size);
-
   for(int i = 0; i < 16; i++)
   {
     if( feof(fp) )
     {
+      printf("here");
       input[i] = 0;
     }
     else
@@ -202,7 +202,7 @@ int main() {
   printf("\nTime: %0.3f ms\n", (end_time - start_time) * 1e3);
 
   // Read result
-  status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * file_size, output, 0, NULL, NULL);
+  status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 16, output, 0, NULL, NULL);
 
   for(int i = 0; i < 16; i++)
   {
