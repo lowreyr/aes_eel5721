@@ -196,7 +196,7 @@ int main() {
   status = clEnqueueReadBuffer(queue, out_buffer, CL_TRUE, 0, sizeof(uint8_t) * 16, output, 0, NULL, NULL);
 
   fp2 = fopen("text.txt","w");
-  for(int i = 0; i < file_size-1; i++)
+  for(int i = 0; i < 16; i++)
   {
     fputc(output[i], fp2);
   }
