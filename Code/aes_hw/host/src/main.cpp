@@ -129,6 +129,7 @@ int main() {
     else
     {
       input[i] = fgetc(fp);
+      printf("%c",input[i]);
     }
   }
 
@@ -183,6 +184,7 @@ int main() {
   status = clEnqueueNDRangeKernel(queue, byteSubstitution9, 1, NULL, &size, &size, 0, NULL, NULL);
   status = clEnqueueNDRangeKernel(queue, shiftRows, 1, NULL, &size, &size, 0, NULL, NULL);
   status = clEnqueueNDRangeKernel(queue, addRoundKey10, 1, NULL, &size, &size, 0, NULL, NULL);
+
   status = clEnqueueNDRangeKernel(keyQueue, keyExpansion, 1, NULL, &size, &size, 0, NULL, NULL);
   status = clEnqueueNDRangeKernel(queue, addRoundKey0, 1, NULL, &size, &size, 0, NULL, NULL);
   status = clEnqueueNDRangeKernel(queue, byteSubstitution0, 1, NULL, &size, &size, 0, NULL, NULL);
