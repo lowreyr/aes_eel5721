@@ -102,17 +102,6 @@ static void display_device_info( cl_device_id device );
 
 // Entry point.
 int main() {
-  FILE *fp;
-  fp = fopen("hello.txt", "r");
-  printf("here\n");
-  fseek(fp,0,SEEK_END);
-  printf("here2\n");
-  size_t file_size = ftell(fp);
-  fclose(fp);
-  printf("here\n");
-  uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*file_size);
-  uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
-  uint8_t input[file_size];
 
   cl_int status;
 
@@ -120,9 +109,18 @@ int main() {
     return -1;
   }
 
+  uint8_t *output = (uint8_t *)malloc(sizeof(uint8_t)*file_size);
+  uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
+  uint8_t input[file_size];
+
+  FILE *fp;
   FILE *fp2;
 
-  fp = fopen("rime.txt", "r");
+  fp = fopen("hello.txt", "r");
+  fseek(fp,0,SEEK_END);
+  printf("here2\n");
+  size_t file_size = ftell(fp);
+
   printf("here\n");
   for(int i = 0; i < file_size; i++)
   {
@@ -135,6 +133,7 @@ int main() {
       input[i] = fgetc(fp);
     }
   }
+
   printf("here3\n");
   key_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t)*16, key, &status);
   in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t)*(file_size-1), input, &status);
