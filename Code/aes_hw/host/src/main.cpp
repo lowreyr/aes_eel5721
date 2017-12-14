@@ -102,7 +102,7 @@ static void display_device_info( cl_device_id device );
 
 // Entry point.
 int main(int argc, char *argv[]) {
-
+  printf("here\n");
   FILE *fp;
   fp = fopen("../../rime.txt", "r");
   fseek(fp,0,SEEK_END);
@@ -188,7 +188,7 @@ int main(int argc, char *argv[]) {
   status = clEnqueueNDRangeKernel(queue, addRoundKey10, 1, NULL, &size, &size, 0, NULL, NULL);
 
   checkError(status, "Failed to launch kernel");
-  
+
   // Wait for command queue to complete pending events
   status = clFinish(queue);
   checkError(status, "Failed to finish");
