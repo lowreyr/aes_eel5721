@@ -112,7 +112,7 @@ int main() {
   FILE *fp;
   FILE *fp2;
 
-  fp = fopen("hello.txt", "r");
+  fp = fopen("rime.txt", "r");
   fp2 = fopen("text.txt","w");
   fseek(fp,0,SEEK_END);
   size_t file_size = ftell(fp);
@@ -126,10 +126,7 @@ int main() {
     for(int j = 0; j < 16; j++)
     {
       input[j] = fgetc(fp);
-      printf("%x",input[j]);
     }
-
-    printf("\n");
 
   key_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t)*16, key, &status);
   in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t)*16, input, &status);
