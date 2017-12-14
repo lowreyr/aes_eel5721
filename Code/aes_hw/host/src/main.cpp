@@ -107,6 +107,31 @@ int main() {
   uint8_t key[16]   = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
   uint8_t input[16];// = {0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x21, 0x21, 0x21, 0x21, 0x21};
 
+
+  printf("here\n");
+  cl_int status;
+
+  if(!init()) {
+    return -1;
+  }
+  key_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 16, key, &status);
+  in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 16, input, &status);
+  out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint8_t) * 16, NULL, &status);
+
+  status = clSetKernelArg(addRoundKey0, 0, sizeof(cl_mem), &in_buffer);
+  status = clSetKernelArg(addRoundKey0, 1, sizeof(cl_mem), &key_buffer);
+  status = clSetKernelArg(addRoundKey10, 0, sizeof(cl_mem), &out_buffer);
+  checkError(status, "Failed to set kernel arg 0");
+
+  printf("here\n");
+  printf("\nKernel initialization is complete.\n");
+  printf("Launching the kernel...\n\n");
+
+  // Configure work set over which the kernel will execute
+  size_t wgSize[3] = {work_group_size, 1, 1};
+  size_t gSize[3] = {work_group_size, 1, 1};
+  size_t size = 1;
+
   FILE *fp;
   FILE *fp2;
   int c;
@@ -133,29 +158,6 @@ int main() {
     }
     printf("%x",input[i]);
   }
-  printf("here\n");
-  cl_int status;
-
-  if(!init()) {
-    return -1;
-  }
-  key_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 16, key, &status);
-  in_buffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint8_t) * 16, input, &status);
-  out_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(uint8_t) * 16, NULL, &status);
-
-  status = clSetKernelArg(addRoundKey0, 0, sizeof(cl_mem), &in_buffer);
-  status = clSetKernelArg(addRoundKey0, 1, sizeof(cl_mem), &key_buffer);
-  status = clSetKernelArg(addRoundKey10, 0, sizeof(cl_mem), &out_buffer);
-  checkError(status, "Failed to set kernel arg 0");
-
-  printf("here\n");
-  printf("\nKernel initialization is complete.\n");
-  printf("Launching the kernel...\n\n");
-
-  // Configure work set over which the kernel will execute
-  size_t wgSize[3] = {work_group_size, 1, 1};
-  size_t gSize[3] = {work_group_size, 1, 1};
-  size_t size = 1;
 
   const double start_time = getCurrentTimestamp();
   // Launch the kernel
